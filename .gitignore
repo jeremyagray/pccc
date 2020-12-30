@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+# Emacs.
+*~
+
+# Python.
+*.pyc
+.coverage
+.pytest_cache
+__pycache__
+htmlcov
