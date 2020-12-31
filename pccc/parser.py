@@ -24,13 +24,21 @@ class ConventionalCommit:
             print(exc)
 
     def __str__(self):
-        parts = []
-        parts.append(self._stringify_header())
-        parts.append(self._stringify_body())
-        parts.append(self._stringify_breaking())
-        parts.append(self._stringify_footers())
+        rs = self._stringify_header()
+        body = self._stringify_body()
+        breaking = self._stringify_breaking()
+        footers = self._stringify_footers()
+        sep = "\n\n"
 
-        return "\n".join(parts)
+        if body:
+            rs += sep + body
+        if breaking:
+            rs += sep + breaking
+            sep = "\n"
+        if footers:
+            rs += sep + footers
+
+        return rs + "\n"
 
     def _stringify_header(self):
         if self.header["scope"] != "" and not self.breaking["flag"]:
@@ -46,11 +54,11 @@ class ConventionalCommit:
         elif self.header["scope"] == "" and self.breaking["flag"]:
             header = fr"{self.header['type']}!: {self.header['msg']}"
 
-        return header + "\n"
+        return header
 
     def _stringify_body(self):
         if len(self.body) > 0:
-            return "\n".join(self.body)
+            return "\n".join(self.body).rstrip()
         else:
             return ""
 
@@ -58,17 +66,17 @@ class ConventionalCommit:
         if self.breaking["msg"] == "":
             return ""
         else:
-            return f"{self.breaking['label']}: {self.breaking['msg']}\n"
+            return f"{self.breaking['label']}: {self.breaking['msg']}"
 
     def _stringify_footers(self):
         footers = []
 
         for footer in self.footers:
-            footers.append(f"{footer['label']}: {footer['msg']}\n")
+            footers.append(f"{footer['label']}: {footer['msg']}")
 
-        return "".join(footers)
+        return "\n".join(footers)
 
-    def __repr__(self, raw):
+    def __repr__(self):
         return fr"ConventionalCommit(msg={self.raw})"
 
 
