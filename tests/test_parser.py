@@ -2,9 +2,10 @@
 
 import sys
 
-sys.path.insert(0, '/home/gray/src/work/pccc')
+sys.path.insert(0, "/home/gray/src/work/pccc")
 
 from pccc import ConventionalCommit as CC  # noqa: E402
+
 
 def test_header():
     msg = """fix: fix parser bug\n"""

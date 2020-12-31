@@ -2,11 +2,11 @@
 
 import sys
 
-sys.path.insert(0, '/home/gray/src/work/pccc')
+sys.path.insert(0, "/home/gray/src/work/pccc")
 
-from pccc import ConventionalCommit as CC
+from pccc import ConventionalCommit as CC  # noqa: E402
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     msg = r"""fix(parser)!: fix parser bug
 
 Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big
