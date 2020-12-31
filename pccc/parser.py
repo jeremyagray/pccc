@@ -131,10 +131,12 @@ def _parse_commit(msg):
             'type': '',
             'scope': '',
             'msg': '',
+            'len': 0,
         },
         'body': {
             'paragraphs': [],
             'msg': '',
+            'll': 0,
         },
         'breaking': {
             'flag': False,
@@ -143,6 +145,10 @@ def _parse_commit(msg):
         },
         'footers': [],
     }
+
+    def _header_handler(s, loc, tokens):
+        tokens[0].append(tokens[0].pop()[0])
+        msg_obj['len'] = len("".join(tokens[0]))
 
     def _header_type_handler(s, loc, tokens):
         msg_obj['header']['type'] = tokens[0]
@@ -183,6 +189,9 @@ def _parse_commit(msg):
             else:
                 nll = False
 
+            if msg_obj['body']['ll'] < len(line):
+                msg_obj['body']['ll'] = len(line)
+
     eos = pp.StringEnd()
 
     type = pp.Regex(_list_to_option_re(types)).setResultsName("type", listAllMatches=True).setParseAction(_header_type_handler)
@@ -197,7 +206,7 @@ def _parse_commit(msg):
         + pp.Optional(header_breaking_flag)
         + header_sep
         + header_msg
-    ).setResultsName("header", listAllMatches=True)
+    ).setResultsName("header", listAllMatches=True).setParseAction(_header_handler)
 
     breaking_label = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName("breaking-label", listAllMatches=True)
     breaking_sep = pp.Regex(r": ")
