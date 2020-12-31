@@ -1,1 +1,1 @@
-from .parser import parse_commit
+from .parser import ConventionalCommit
