@@ -277,14 +277,14 @@ def _parse_commit(raw):
         .setParseAction(_footer_handler)
     )
 
-    footers = pp.Group(breaking ^ footer)
+    footer_types = pp.Group(breaking ^ footer)
 
     line = pp.Regex(r".*")
     bnewline = pp.LineEnd()
     skip = bnewline + bnewline
-    par = pp.OneOrMore(~eos + ~footers + ~bnewline + line + bnewline)
+    par = pp.OneOrMore(~eos + ~footer_types + ~bnewline + line + bnewline)
     body = skip + pp.OneOrMore(
-        ~eos + ~footers + par + pp.Optional(bnewline)
+        ~eos + ~footer_types + par + pp.Optional(bnewline)
     ).setParseAction(_body_handler)
 
     commit_msg = (
