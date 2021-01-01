@@ -1,0 +1,34 @@
+{
+  "commit": "fix(parser)!: fix parser bug\n\nFix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug. Fix big parser bug. Fix big parser bug. Fix big parser\nbug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix\nbig parser bug.\n\nAlso, format your code with black or black, whichever you prefer.\n\nBREAKING CHANGE: This breaks the old grammar.\nSigned-Off-By: Jeremy A Gray <jeremy.a.gray@gmail.com>\nSigned-Off-By: John Doe <jdoe@example.com>, John Doe\n<jdoe@example.com>, John Doe <jdoe@example.com>, John Doe\n<jdoe@example.com>, John Doe <jdoe@example.com>, John Doe\n<jdoe@example.com>, John Doe <jdoe@example.com>\n",
+  "header": {
+    "type": "fix",
+    "scope": "parser",
+    "description": "fix parser bug",
+    "length": 28
+  },
+  "body": {
+    "paragraphs": [
+      "Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug. Fix big parser bug. Fix big parser bug. Fix big parser\nbug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix\nbig parser bug.\n",
+      "Also, format your code with black or black, whichever you prefer.\n"
+    ],
+    "longest": 68
+  },
+  "breaking": {
+    "flag": true,
+    "token": "BREAKING CHANGE",
+    "separator": ": ",
+    "value": "This breaks the old grammar."
+  },
+  "footers": [
+    {
+      "token": "Signed-Off-By",
+      "separator": ": ",
+      "value": "Jeremy A Gray <jeremy.a.gray@gmail.com>"
+    },
+    {
+      "token": "Signed-Off-By",
+      "separator": ": ",
+      "value": "John Doe <jdoe@example.com>, John Doe\n<jdoe@example.com>, John Doe <jdoe@example.com>, John Doe\n<jdoe@example.com>, John Doe <jdoe@example.com>, John Doe\n<jdoe@example.com>, John Doe <jdoe@example.com>"
+    }
+  ]
+}

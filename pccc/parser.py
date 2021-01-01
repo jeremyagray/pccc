@@ -186,7 +186,7 @@ def _parse_commit(raw):
     def _breaking_handler(s, loc, tokens):
         msg_obj["breaking"]["token"] = tokens[0][0]
         msg_obj["breaking"]["separator"] = tokens[0][1]
-        msg_obj["breaking"]["value"] = tokens[0][2][0].strip()
+        msg_obj["breaking"]["value"] = "\n".join(tokens[0][2])
 
     def _footer_handler(s, loc, tokens):
         for footer in tokens:
@@ -194,7 +194,7 @@ def _parse_commit(raw):
                 {
                     "token": footer[0],
                     "separator": footer[1],
-                    "value": footer[2][0].strip(),
+                    "value": "\n".join(tokens[0][2]),
                 }
             )
 
@@ -256,8 +256,14 @@ def _parse_commit(raw):
     breaking_token = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName(
         "breaking-token", listAllMatches=True
     )
-    breaking_value = pp.Group(~newline + ~eos + pp.Regex(r".*")).setResultsName(
-        "breaking-value", listAllMatches=True
+    footer_token = pp.Regex(_list_to_option_re(footers)).setResultsName(
+        "footer-token", listAllMatches=True
+    )
+
+    breaking_value = (
+        pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
+        .setWhitespaceChars(" 	")
+        .setResultsName("breaking-value", listAllMatches=True)
     )
     breaking = (
         pp.Group(breaking_token + footer_sep + breaking_value)
@@ -265,11 +271,10 @@ def _parse_commit(raw):
         .setParseAction(_breaking_handler)
     )
 
-    footer_token = pp.Regex(_list_to_option_re(footers)).setResultsName(
-        "footer-token", listAllMatches=True
-    )
-    footer_value = pp.Group(~newline + ~eos + pp.Regex(r".*")).setResultsName(
-        "footer-value", listAllMatches=True
+    footer_value = (
+        pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
+        .setWhitespaceChars(" 	")
+        .setResultsName("footer-value", listAllMatches=True)
     )
     footer = (
         pp.Group(footer_token + footer_sep + footer_value)
