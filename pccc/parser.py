@@ -168,7 +168,7 @@ def _parse_commit(raw):
 
     def _header_handler(s, loc, tokens):
         tokens[0].append(tokens[0].pop()[0])
-        msg_obj["length"] = len("".join(tokens[0]))
+        msg_obj["header"]["length"] = len("".join(tokens[0]))
 
     def _header_type_handler(s, loc, tokens):
         msg_obj["header"]["type"] = tokens[0]
