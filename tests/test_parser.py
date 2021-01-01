@@ -11,7 +11,7 @@ from pccc import ConventionalCommit as CC  # noqa: E402
 
 
 @pytest.mark.parametrize(
-    "msg, expected",
+    "raw, expected",
     [
         ("fix: fix parser bug\n", ("fix", "", False)),
         ("fix(parser): fix parser bug\n", ("fix", "parser", False)),
@@ -19,18 +19,18 @@ from pccc import ConventionalCommit as CC  # noqa: E402
         ("fix(parser)!: fix parser bug\n", ("fix", "parser", True)),
     ],
 )
-def test_header_only(msg, expected):
-    cc = CC(msg)
+def test_header_only(raw, expected):
+    cc = CC(raw)
     assert cc.header["type"] == expected[0]
     assert cc.header["scope"] == expected[1]
     assert cc.breaking["flag"] == expected[2]
 
-    assert cc.__str__() == msg
-    assert cc.__repr__() == fr"ConventionalCommit(msg={msg})"
+    assert cc.__str__() == raw
+    assert cc.__repr__() == fr"ConventionalCommit(raw={raw})"
 
 
 @pytest.mark.parametrize(
-    "msg",
+    "raw",
     [
         ("redo: fix parser bug\n"),
         ("redo(parser): fix parser bug\n"),
@@ -42,9 +42,9 @@ def test_header_only(msg, expected):
         ("fix?(parser): fix parser bug\n"),
     ],
 )
-def test_bad_header_only(msg):
-    msg = """fix(bob): fix parser bug\n"""
-    cc = CC(msg)
+def test_bad_header_only(raw):
+    raw = """fix(bob): fix parser bug\n"""
+    cc = CC(raw)
 
     assert isinstance(cc.exc, pp.ParseException)
 
@@ -54,7 +54,7 @@ def test_bad_header_only(msg):
     [
         (
             {
-                "msg": r"""fix: fix parser bug
+                "raw": r"""fix: fix parser bug
 
 BREAKING CHANGE: This breaks the old grammar.
 """,
@@ -72,7 +72,7 @@ BREAKING CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser): fix parser bug
+                "raw": r"""fix(parser): fix parser bug
 
 BREAKING CHANGE: This breaks the old grammar.
 """,
@@ -90,7 +90,7 @@ BREAKING CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix!: fix parser bug
+                "raw": r"""fix!: fix parser bug
 
 BREAKING CHANGE: This breaks the old grammar.
 """,
@@ -108,7 +108,7 @@ BREAKING CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser)!: fix parser bug
+                "raw": r"""fix(parser)!: fix parser bug
 
 BREAKING CHANGE: This breaks the old grammar.
 """,
@@ -126,7 +126,7 @@ BREAKING CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix: fix parser bug
+                "raw": r"""fix: fix parser bug
 
 BREAKING-CHANGE: This breaks the old grammar.
 """,
@@ -144,7 +144,7 @@ BREAKING-CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser): fix parser bug
+                "raw": r"""fix(parser): fix parser bug
 
 BREAKING-CHANGE: This breaks the old grammar.
 """,
@@ -162,7 +162,7 @@ BREAKING-CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix!: fix parser bug
+                "raw": r"""fix!: fix parser bug
 
 BREAKING-CHANGE: This breaks the old grammar.
 """,
@@ -180,7 +180,7 @@ BREAKING-CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser)!: fix parser bug
+                "raw": r"""fix(parser)!: fix parser bug
 
 BREAKING-CHANGE: This breaks the old grammar.
 """,
@@ -198,7 +198,7 @@ BREAKING-CHANGE: This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix: fix parser bug
+                "raw": r"""fix: fix parser bug
 
 BREAKING CHANGE #This breaks the old grammar.
 """,
@@ -217,7 +217,7 @@ BREAKING CHANGE #This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser): fix parser bug
+                "raw": r"""fix(parser): fix parser bug
 
 BREAKING CHANGE #This breaks the old grammar.
 """,
@@ -236,7 +236,7 @@ BREAKING CHANGE #This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix!: fix parser bug
+                "raw": r"""fix!: fix parser bug
 
 BREAKING CHANGE #This breaks the old grammar.
 """,
@@ -255,7 +255,7 @@ BREAKING CHANGE #This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser)!: fix parser bug
+                "raw": r"""fix(parser)!: fix parser bug
 
 BREAKING CHANGE #This breaks the old grammar.
 """,
@@ -274,7 +274,7 @@ BREAKING CHANGE #This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix: fix parser bug
+                "raw": r"""fix: fix parser bug
 
 BREAKING-CHANGE #This breaks the old grammar.
 """,
@@ -293,7 +293,7 @@ BREAKING-CHANGE #This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser): fix parser bug
+                "raw": r"""fix(parser): fix parser bug
 
 BREAKING-CHANGE #This breaks the old grammar.
 """,
@@ -312,7 +312,7 @@ BREAKING-CHANGE #This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix!: fix parser bug
+                "raw": r"""fix!: fix parser bug
 
 BREAKING-CHANGE #This breaks the old grammar.
 """,
@@ -331,7 +331,7 @@ BREAKING-CHANGE #This breaks the old grammar.
         ),
         (
             {
-                "msg": r"""fix(parser)!: fix parser bug
+                "raw": r"""fix(parser)!: fix parser bug
 
 BREAKING-CHANGE #This breaks the old grammar.
 """,
@@ -351,7 +351,7 @@ BREAKING-CHANGE #This breaks the old grammar.
     ],
 )
 def test_header_breaking(obj):
-    cc = CC(obj[0]["msg"])
+    cc = CC(obj[0]["raw"])
 
     assert cc.header["type"] == obj[0]["header"]["type"]
     assert cc.header["scope"] == obj[0]["header"]["scope"]
@@ -361,12 +361,12 @@ def test_header_breaking(obj):
     assert cc.breaking["token"] == obj[0]["breaking"]["token"]
     assert cc.breaking["value"] == obj[0]["breaking"]["value"]
 
-    assert cc.__str__() == obj[0]["msg"]
-    assert cc.__repr__() == fr"ConventionalCommit(msg={obj[0]['msg']})"
+    assert cc.__str__() == obj[0]["raw"]
+    assert cc.__repr__() == fr"ConventionalCommit(raw={obj[0]['raw']})"
 
 
 def test_commit():
-    msg = r"""fix(parser)!: fix parser bug
+    raw = r"""fix(parser)!: fix parser bug
 
 Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big
 parser bug. Fix big parser bug. Fix big parser bug. Fix big parser
@@ -380,14 +380,14 @@ Signed-Off-By: Jeremy A Gray <jeremy.a.gray@gmail.com>
 Signed-Off-By: John Doe <jdoe@example.com>
 """
 
-    cc = CC(msg)
+    cc = CC(raw)
 
     assert cc.header["type"] == "fix"
     assert cc.header["scope"] == "parser"
     assert cc.header["description"] == "fix parser bug"
 
     assert (
-        cc.body[0]
+        cc.body["paragraphs"][0]
         == r"""Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big
 parser bug. Fix big parser bug. Fix big parser bug. Fix big parser
 bug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix
@@ -395,7 +395,7 @@ big parser bug.
 """
     )
     assert (
-        cc.body[1]
+        cc.body["paragraphs"][1]
         == r"""Also, format your code with black or black, whichever you prefer.
 """
     )
@@ -411,5 +411,5 @@ big parser bug.
     assert cc.footers[1]["separator"] == ": "
     assert cc.footers[1]["value"] == "John Doe <jdoe@example.com>"
 
-    assert cc.__str__() == msg
-    assert cc.__repr__() == fr"ConventionalCommit(msg={msg})"
+    assert cc.__str__() == raw
+    assert cc.__repr__() == fr"ConventionalCommit(raw={raw})"

@@ -10,14 +10,14 @@ import pyparsing as pp
 
 
 class ConventionalCommit:
-    def __init__(self, msg):
-        self.raw = msg
+    def __init__(self, raw):
+        self.raw = raw
         try:
-            msg = _parse_commit(msg)
-            self.header = copy.deepcopy(msg["header"])
-            self.body = copy.deepcopy(msg["body"]["paragraphs"])
-            self.breaking = copy.deepcopy(msg["breaking"])
-            self.footers = copy.deepcopy(msg["footers"])
+            cc = _parse_commit(raw)
+            self.header = copy.deepcopy(cc["header"])
+            self.body = copy.deepcopy(cc["body"])
+            self.breaking = copy.deepcopy(cc["breaking"])
+            self.footers = copy.deepcopy(cc["footers"])
             self.exc = None
         except pp.ParseException as exc:
             self.exc = exc
@@ -59,8 +59,8 @@ class ConventionalCommit:
         return header
 
     def _stringify_body(self):
-        if len(self.body) > 0:
-            return "\n".join(self.body).rstrip()
+        if len(self.body["paragraphs"]) > 0:
+            return "\n".join(self.body["paragraphs"]).rstrip()
         else:
             return ""
 
@@ -82,14 +82,14 @@ class ConventionalCommit:
         return "\n".join(footers)
 
     def __repr__(self):
-        return fr"ConventionalCommit(msg={self.raw})"
+        return fr"ConventionalCommit(raw={self.raw})"
 
 
 def _list_to_option_re(list):
     return fr"({'|'.join(list)})"
 
 
-def _parse_commit(msg):
+def _parse_commit(raw):
     """Parse a conventional commit message.
 
     Parse a conventional commit message according to the
@@ -291,6 +291,6 @@ def _parse_commit(msg):
         header + pp.Optional(body) + pp.Optional(breaking) + pp.ZeroOrMore(footer)
     ).setResultsName("commit-msg", listAllMatches=True)
 
-    commit_msg.parseString(msg)
+    commit_msg.parseString(raw)
 
     return msg_obj
