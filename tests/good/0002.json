@@ -1,0 +1,20 @@
+{
+  "commit": "fix: fix parser bug\n",
+  "header": {
+    "type": "fix",
+    "scope": "",
+    "description": "fix parser bug",
+    "length": 19
+  },
+  "body": {
+    "paragraphs": [],
+    "longest": 0
+  },
+  "breaking": {
+    "flag": false,
+    "token": "",
+    "separator": "",
+    "value": ""
+  },
+  "footers": []
+}

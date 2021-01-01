@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import json
+import os
+import re
 import sys
 
 import pyparsing as pp
@@ -10,406 +13,62 @@ sys.path.insert(0, "/home/gray/src/work/pccc")
 from pccc import ConventionalCommit as CC  # noqa: E402
 
 
-@pytest.mark.parametrize(
-    "raw, expected",
-    [
-        ("fix: fix parser bug\n", ("fix", "", False)),
-        ("fix(parser): fix parser bug\n", ("fix", "parser", False)),
-        ("fix!: fix parser bug\n", ("fix", "", True)),
-        ("fix(parser)!: fix parser bug\n", ("fix", "parser", True)),
-    ],
-)
-def test_header_only(raw, expected):
-    cc = CC(raw)
-    assert cc.header["type"] == expected[0]
-    assert cc.header["scope"] == expected[1]
-    assert cc.breaking["flag"] == expected[2]
+def get_good_commits():
+    commits = []
+    json_file_re = re.compile(r"\d{4}\.json$")
 
-    assert cc.__str__() == raw
-    assert cc.__repr__() == fr"ConventionalCommit(raw={raw})"
+    with os.scandir("./tests/good") as it:
+        for entry in it:
+            if entry.is_file() and json_file_re.match(entry.name):
+                commit = []
+                with open(entry.path, "r") as file:
+                    try:
+                        commit.append(json.load(file))
+                    except json.JSONDecodeError as error:
+                        print(f"JSON error in file {entry.name}")
+                        raise error
+                commits.append(tuple(commit))
+
+    return commits
 
 
-@pytest.mark.parametrize(
-    "raw",
-    [
-        ("redo: fix parser bug\n"),
-        ("redo(parser): fix parser bug\n"),
-        ("redo(docs): fix parser bug\n"),
-        ("fix(docs): fix parser bug\n"),
-        ("fix?: fix parser bug\n"),
-        ("redo!: fix parser bug\n"),
-        ("fix!(parser): fix parser bug\n"),
-        ("fix?(parser): fix parser bug\n"),
-    ],
-)
-def test_bad_header_only(raw):
-    raw = """fix(bob): fix parser bug\n"""
-    cc = CC(raw)
+def get_bad_commits():
+    commits = []
 
-    assert isinstance(cc.exc, pp.ParseException)
+    with os.scandir("./tests/bad") as it:
+        for entry in it:
+            if entry.is_file():
+                commit = ""
+                with open(entry.path, "r") as file:
+                    for line in file:
+                        commit += line
+                commits.append(tuple(commit))
+
+    return commits
 
 
 @pytest.mark.parametrize(
     "obj",
-    [
-        (
-            {
-                "raw": r"""fix: fix parser bug
-
-BREAKING CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser): fix parser bug
-
-BREAKING CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix!: fix parser bug
-
-BREAKING CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser)!: fix parser bug
-
-BREAKING CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix: fix parser bug
-
-BREAKING-CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING-CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser): fix parser bug
-
-BREAKING-CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING-CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix!: fix parser bug
-
-BREAKING-CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING-CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser)!: fix parser bug
-
-BREAKING-CHANGE: This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING-CHANGE",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix: fix parser bug
-
-BREAKING CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser): fix parser bug
-
-BREAKING CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix!: fix parser bug
-
-BREAKING CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser)!: fix parser bug
-
-BREAKING CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix: fix parser bug
-
-BREAKING-CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING-CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser): fix parser bug
-
-BREAKING-CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": False,
-                    "token": "BREAKING-CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix!: fix parser bug
-
-BREAKING-CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING-CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-        (
-            {
-                "raw": r"""fix(parser)!: fix parser bug
-
-BREAKING-CHANGE #This breaks the old grammar.
-""",
-                "header": {
-                    "type": "fix",
-                    "scope": "parser",
-                    "description": "fix parser bug",
-                },
-                "breaking": {
-                    "flag": True,
-                    "token": "BREAKING-CHANGE",
-                    "separator": " #",
-                    "value": "This breaks the old grammar.",
-                },
-            },
-        ),
-    ],
+    get_good_commits(),
 )
-def test_header_breaking(obj):
-    cc = CC(obj[0]["raw"])
+def test_good_commits(obj):
+    cc = CC(obj[0]["commit"])
 
-    assert cc.header["type"] == obj[0]["header"]["type"]
-    assert cc.header["scope"] == obj[0]["header"]["scope"]
-    assert cc.header["description"] == obj[0]["header"]["description"]
+    assert cc.header == obj[0]["header"]
+    assert cc.body == obj[0]["body"]
+    assert cc.breaking == obj[0]["breaking"]
+    assert cc.footers == obj[0]["footers"]
 
-    assert cc.breaking["flag"] is obj[0]["breaking"]["flag"]
-    assert cc.breaking["token"] == obj[0]["breaking"]["token"]
-    assert cc.breaking["value"] == obj[0]["breaking"]["value"]
-
-    assert cc.__str__() == obj[0]["raw"]
-    assert cc.__repr__() == fr"ConventionalCommit(raw={obj[0]['raw']})"
+    assert cc.__str__() == obj[0]["commit"]
+    assert cc.__repr__() == fr"ConventionalCommit(raw={obj[0]['commit']})"
 
 
-def test_commit():
-    raw = r"""fix(parser)!: fix parser bug
-
-Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big
-parser bug. Fix big parser bug. Fix big parser bug. Fix big parser
-bug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix
-big parser bug.
-
-Also, format your code with black or black, whichever you prefer.
-
-BREAKING CHANGE: This breaks the old grammar.
-Signed-Off-By: Jeremy A Gray <jeremy.a.gray@gmail.com>
-Signed-Off-By: John Doe <jdoe@example.com>
-"""
-
+@pytest.mark.parametrize(
+    "raw",
+    get_bad_commits(),
+)
+def test_bad_commits(raw):
+    raw = """fix(bob): fix parser bug\n"""
     cc = CC(raw)
 
-    assert cc.header["type"] == "fix"
-    assert cc.header["scope"] == "parser"
-    assert cc.header["description"] == "fix parser bug"
-
-    assert (
-        cc.body["paragraphs"][0]
-        == r"""Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big
-parser bug. Fix big parser bug. Fix big parser bug. Fix big parser
-bug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix
-big parser bug.
-"""
-    )
-    assert (
-        cc.body["paragraphs"][1]
-        == r"""Also, format your code with black or black, whichever you prefer.
-"""
-    )
-
-    assert cc.breaking["token"] == "BREAKING CHANGE"
-    assert cc.breaking["value"] == "This breaks the old grammar."
-    assert cc.breaking["flag"] is True
-
-    assert cc.footers[0]["token"] == "Signed-Off-By"
-    assert cc.footers[0]["separator"] == ": "
-    assert cc.footers[0]["value"] == "Jeremy A Gray <jeremy.a.gray@gmail.com>"
-    assert cc.footers[1]["token"] == "Signed-Off-By"
-    assert cc.footers[1]["separator"] == ": "
-    assert cc.footers[1]["value"] == "John Doe <jdoe@example.com>"
-
-    assert cc.__str__() == raw
-    assert cc.__repr__() == fr"ConventionalCommit(raw={raw})"
+    assert isinstance(cc.exc, pp.ParseException)

@@ -1,0 +1,20 @@
+{
+  "commit": "fix(parser)!: fix parser bug\n\nBREAKING CHANGE: This breaks the old grammar.\n",
+  "header": {
+    "type": "fix",
+    "scope": "parser",
+    "description": "fix parser bug",
+    "length": 28
+  },
+  "body": {
+    "paragraphs": [],
+    "longest": 0
+  },
+  "breaking": {
+    "flag": true,
+    "token": "BREAKING CHANGE",
+    "separator": ": ",
+    "value": "This breaks the old grammar."
+  },
+  "footers": []
+}
