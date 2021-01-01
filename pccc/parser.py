@@ -43,16 +43,18 @@ class ConventionalCommit:
     def _stringify_header(self):
         if self.header["scope"] != "" and not self.breaking["flag"]:
             header = (
-                fr"{self.header['type']}({self.header['scope']}): {self.header['msg']}"
+                fr"{self.header['type']}({self.header['scope']}):"
+                fr" {self.header['description']}"
             )
         elif self.header["scope"] != "" and self.breaking["flag"]:
             header = (
-                fr"{self.header['type']}({self.header['scope']})!: {self.header['msg']}"
+                fr"{self.header['type']}({self.header['scope']})!:"
+                fr" {self.header['description']}"
             )
         elif self.header["scope"] == "" and not self.breaking["flag"]:
-            header = fr"{self.header['type']}: {self.header['msg']}"
+            header = fr"{self.header['type']}: {self.header['description']}"
         elif self.header["scope"] == "" and self.breaking["flag"]:
-            header = fr"{self.header['type']}!: {self.header['msg']}"
+            header = fr"{self.header['type']}!: {self.header['description']}"
 
         return header
 
@@ -63,16 +65,19 @@ class ConventionalCommit:
             return ""
 
     def _stringify_breaking(self):
-        if self.breaking["msg"] == "":
+        if self.breaking["value"] == "":
             return ""
         else:
-            return f"{self.breaking['label']}: {self.breaking['msg']}"
+            return (
+                f"{self.breaking['token']}{self.breaking['separator']}"
+                f"{self.breaking['value']}"
+            )
 
     def _stringify_footers(self):
         footers = []
 
         for footer in self.footers:
-            footers.append(f"{footer['label']}: {footer['msg']}")
+            footers.append(f"{footer['token']}{footer['separator']}{footer['value']}")
 
         return "\n".join(footers)
 
@@ -95,16 +100,15 @@ def _parse_commit(msg):
         scope :: ( '(' 'user defined scopes' ')' )
         header-breaking-flag :: !
         header-sep :: ': '
-        header-msg :: .*
-        header :: type scope? header-breaking-flag? header-sep header-msg
-        breaking-label :: ( BREAKING CHANGE | BREAKING-CHANGE )
-        breaking-sep :: ': '
-        breaking-msg :: .*
-        breaking :: breaking-label breaking-sep breaking-msg
-        footer-label :: ( 'user defined footers' )
-        footer-sep :: ': '
-        footer-msg :: .*
-        footer :: footer-label footer-sep footer-msg
+        header-desc :: .*
+        header :: type scope? header-breaking-flag? header-sep header-desc
+        breaking-token :: ( BREAKING CHANGE | BREAKING-CHANGE )
+        footer-sep :: ( ': ' | ' #' )
+        breaking-value :: .*
+        breaking :: breaking-token footer-sep breaking-value
+        footer-token :: ( 'user defined footers' )
+        footer-value :: .*
+        footer :: footer-token footer-sep footer-value
         line :: .*
         newline :: '\n'
         skip :: newline newline
@@ -140,25 +144,31 @@ def _parse_commit(msg):
         "header": {
             "type": "",
             "scope": "",
-            "msg": "",
-            "len": 0,
+            "description": "",
+            "length": 0,
         },
         "body": {
             "paragraphs": [],
-            "msg": "",
-            "ll": 0,
+            "longest": 0,
         },
         "breaking": {
             "flag": False,
-            "label": "",
-            "msg": "",
+            "token": "",
+            "separator": "",
+            "value": "",
         },
-        "footers": [],
+        "footers": [
+            # {
+            #     "token": "",
+            #     "separator": "",
+            #     "value": "",
+            # },
+        ],
     }
 
     def _header_handler(s, loc, tokens):
         tokens[0].append(tokens[0].pop()[0])
-        msg_obj["len"] = len("".join(tokens[0]))
+        msg_obj["length"] = len("".join(tokens[0]))
 
     def _header_type_handler(s, loc, tokens):
         msg_obj["header"]["type"] = tokens[0]
@@ -166,23 +176,25 @@ def _parse_commit(msg):
     def _header_scope_handler(s, loc, tokens):
         msg_obj["header"]["scope"] = tokens[0].lstrip("(").rstrip(")")
 
-    def _header_msg_handler(s, loc, tokens):
-        msg_obj["header"]["msg"] = tokens[0][0].strip()
+    def _header_desc_handler(s, loc, tokens):
+        msg_obj["header"]["description"] = tokens[0][0].strip()
 
     def _breaking_flag_handler(s, loc, tokens):
         if tokens[0] == "!":
             msg_obj["breaking"]["flag"] = True
 
     def _breaking_handler(s, loc, tokens):
-        msg_obj["breaking"]["label"] = tokens[0][0]
-        msg_obj["breaking"]["msg"] = tokens[0][2][0].strip()
+        msg_obj["breaking"]["token"] = tokens[0][0]
+        msg_obj["breaking"]["separator"] = tokens[0][1]
+        msg_obj["breaking"]["value"] = tokens[0][2][0].strip()
 
     def _footer_handler(s, loc, tokens):
         for footer in tokens:
             msg_obj["footers"].append(
                 {
-                    "label": footer[0],
-                    "msg": footer[2][0].strip(),
+                    "token": footer[0],
+                    "separator": footer[1],
+                    "value": footer[2][0].strip(),
                 }
             )
 
@@ -201,8 +213,8 @@ def _parse_commit(msg):
             else:
                 nll = False
 
-            if msg_obj["body"]["ll"] < len(line):
-                msg_obj["body"]["ll"] = len(line)
+            if msg_obj["body"]["longest"] < len(line):
+                msg_obj["body"]["longest"] = len(line)
 
     eos = pp.StringEnd()
 
@@ -223,10 +235,10 @@ def _parse_commit(msg):
     )
     header_sep = pp.Regex(r": ")
     newline = pp.LineEnd().suppress()
-    header_msg = (
+    header_desc = (
         pp.Group(~newline + ~eos + pp.Regex(r".*"))
-        .setResultsName("header-msg", listAllMatches=True)
-        .setParseAction(_header_msg_handler)
+        .setResultsName("header-desc", listAllMatches=True)
+        .setParseAction(_header_desc_handler)
     )
     header = (
         pp.Group(
@@ -234,34 +246,33 @@ def _parse_commit(msg):
             + pp.Optional(scope)
             + pp.Optional(header_breaking_flag)
             + header_sep
-            + header_msg
+            + header_desc
         )
         .setResultsName("header", listAllMatches=True)
         .setParseAction(_header_handler)
     )
 
-    breaking_label = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName(
-        "breaking-label", listAllMatches=True
+    footer_sep = pp.Regex(r"(: | #)").setWhitespaceChars("	\n")
+    breaking_token = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName(
+        "breaking-token", listAllMatches=True
     )
-    breaking_sep = pp.Regex(r": ")
-    breaking_msg = pp.Group(~newline + ~eos + pp.Regex(r".*")).setResultsName(
-        "breaking-msg", listAllMatches=True
+    breaking_value = pp.Group(~newline + ~eos + pp.Regex(r".*")).setResultsName(
+        "breaking-value", listAllMatches=True
     )
     breaking = (
-        pp.Group(breaking_label + breaking_sep + breaking_msg)
+        pp.Group(breaking_token + footer_sep + breaking_value)
         .setResultsName("breaking", listAllMatches=True)
         .setParseAction(_breaking_handler)
     )
 
-    footer_label = pp.Regex(_list_to_option_re(footers)).setResultsName(
-        "footer-label", listAllMatches=True
+    footer_token = pp.Regex(_list_to_option_re(footers)).setResultsName(
+        "footer-token", listAllMatches=True
     )
-    footer_sep = pp.Regex(r": ")
-    footer_msg = pp.Group(~newline + ~eos + pp.Regex(r".*")).setResultsName(
-        "footer-msg", listAllMatches=True
+    footer_value = pp.Group(~newline + ~eos + pp.Regex(r".*")).setResultsName(
+        "footer-value", listAllMatches=True
     )
     footer = (
-        pp.Group(footer_label + footer_sep + footer_msg)
+        pp.Group(footer_token + footer_sep + footer_value)
         .setResultsName("footers", listAllMatches=True)
         .setParseAction(_footer_handler)
     )

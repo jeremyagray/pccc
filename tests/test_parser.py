@@ -61,12 +61,12 @@ BREAKING CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": False,
-                    "label": "BREAKING CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING CHANGE",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -79,12 +79,12 @@ BREAKING CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "parser",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": False,
-                    "label": "BREAKING CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING CHANGE",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -97,12 +97,12 @@ BREAKING CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": True,
-                    "label": "BREAKING CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING CHANGE",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -115,12 +115,12 @@ BREAKING CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "parser",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": True,
-                    "label": "BREAKING CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING CHANGE",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -133,12 +133,12 @@ BREAKING-CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": False,
-                    "label": "BREAKING-CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING-CHANGE",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -151,12 +151,12 @@ BREAKING-CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "parser",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": False,
-                    "label": "BREAKING-CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING-CHANGE",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -169,12 +169,12 @@ BREAKING-CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": True,
-                    "label": "BREAKING-CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING-CHANGE",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -187,12 +187,164 @@ BREAKING-CHANGE: This breaks the old grammar.
                 "header": {
                     "type": "fix",
                     "scope": "parser",
-                    "msg": "fix parser bug",
+                    "description": "fix parser bug",
                 },
                 "breaking": {
                     "flag": True,
-                    "label": "BREAKING-CHANGE",
-                    "msg": "This breaks the old grammar.",
+                    "token": "BREAKING-CHANGE",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix: fix parser bug
+
+BREAKING CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": False,
+                    "token": "BREAKING CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix(parser): fix parser bug
+
+BREAKING CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "parser",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": False,
+                    "token": "BREAKING CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix!: fix parser bug
+
+BREAKING CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": True,
+                    "token": "BREAKING CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix(parser)!: fix parser bug
+
+BREAKING CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "parser",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": True,
+                    "token": "BREAKING CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix: fix parser bug
+
+BREAKING-CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": False,
+                    "token": "BREAKING-CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix(parser): fix parser bug
+
+BREAKING-CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "parser",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": False,
+                    "token": "BREAKING-CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix!: fix parser bug
+
+BREAKING-CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": True,
+                    "token": "BREAKING-CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
+                },
+            },
+        ),
+        (
+            {
+                "msg": r"""fix(parser)!: fix parser bug
+
+BREAKING-CHANGE #This breaks the old grammar.
+""",
+                "header": {
+                    "type": "fix",
+                    "scope": "parser",
+                    "description": "fix parser bug",
+                },
+                "breaking": {
+                    "flag": True,
+                    "token": "BREAKING-CHANGE",
+                    "separator": " #",
+                    "value": "This breaks the old grammar.",
                 },
             },
         ),
@@ -203,11 +355,11 @@ def test_header_breaking(obj):
 
     assert cc.header["type"] == obj[0]["header"]["type"]
     assert cc.header["scope"] == obj[0]["header"]["scope"]
-    assert cc.header["msg"] == obj[0]["header"]["msg"]
+    assert cc.header["description"] == obj[0]["header"]["description"]
 
     assert cc.breaking["flag"] is obj[0]["breaking"]["flag"]
-    assert cc.breaking["label"] == obj[0]["breaking"]["label"]
-    assert cc.breaking["msg"] == obj[0]["breaking"]["msg"]
+    assert cc.breaking["token"] == obj[0]["breaking"]["token"]
+    assert cc.breaking["value"] == obj[0]["breaking"]["value"]
 
     assert cc.__str__() == obj[0]["msg"]
     assert cc.__repr__() == fr"ConventionalCommit(msg={obj[0]['msg']})"
@@ -232,7 +384,7 @@ Signed-Off-By: John Doe <jdoe@example.com>
 
     assert cc.header["type"] == "fix"
     assert cc.header["scope"] == "parser"
-    assert cc.header["msg"] == "fix parser bug"
+    assert cc.header["description"] == "fix parser bug"
 
     assert (
         cc.body[0]
@@ -248,14 +400,16 @@ big parser bug.
 """
     )
 
-    assert cc.breaking["label"] == "BREAKING CHANGE"
-    assert cc.breaking["msg"] == "This breaks the old grammar."
+    assert cc.breaking["token"] == "BREAKING CHANGE"
+    assert cc.breaking["value"] == "This breaks the old grammar."
     assert cc.breaking["flag"] is True
 
-    assert cc.footers[0]["label"] == "Signed-Off-By"
-    assert cc.footers[0]["msg"] == "Jeremy A Gray <jeremy.a.gray@gmail.com>"
-    assert cc.footers[1]["label"] == "Signed-Off-By"
-    assert cc.footers[1]["msg"] == "John Doe <jdoe@example.com>"
+    assert cc.footers[0]["token"] == "Signed-Off-By"
+    assert cc.footers[0]["separator"] == ": "
+    assert cc.footers[0]["value"] == "Jeremy A Gray <jeremy.a.gray@gmail.com>"
+    assert cc.footers[1]["token"] == "Signed-Off-By"
+    assert cc.footers[1]["separator"] == ": "
+    assert cc.footers[1]["value"] == "John Doe <jdoe@example.com>"
 
     assert cc.__str__() == msg
     assert cc.__repr__() == fr"ConventionalCommit(msg={msg})"
