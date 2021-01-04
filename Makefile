@@ -22,7 +22,10 @@
 #
 #***********************************************************************
 
-.PHONY : commit lint test test-all
+.PHONY : commit lint pip test test-all
+
+test-all:
+	pytest -vv --black --flake8 --cov pccc --cov-report term --cov-report html
 
 commit :
 	pre-commit run --all-files
@@ -35,6 +38,3 @@ pip :
 
 test:
 	pytest --cov pccc --cov-report term
-
-test-all:
-	pytest -vv --black --flake8 --cov pccc --cov-report term --cov-report html
