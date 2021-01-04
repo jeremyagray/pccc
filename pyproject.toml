@@ -28,6 +28,40 @@ line_length = 88
 multi_line_output = 3
 use_parentheses = true
 
+[tool.pccc]
+
+header_length = 50
+body_length = 72
+rewrap = true
+spell_check = false
+repair = false
+
+types = [
+"build",
+"ci",
+"docs",
+"feat",
+"fix",
+"perf",
+"refactor",
+"release",
+"style",
+"test"
+]
+
+scopes = [
+"config",
+"parser"
+]
+
+footers = [
+"Signed-off-by"
+]
+
+required_footers = [
+"Signed-off-by"
+]
+
 [tool.poetry]
 
 authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
