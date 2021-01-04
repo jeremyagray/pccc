@@ -1,12 +1,13 @@
-#!/usr/bin/env python
-
 import copy
+import fileinput
+import re
 
 import pyparsing as pp
 
+from .config import get_configuration_options
+
 # import textwrap  # wrap text
 # import pyenchant  # spell check
-# import toml  # config files
 
 
 class ConventionalCommit:
@@ -299,3 +300,34 @@ def _parse_commit(raw):
     commit_msg.parseString(raw)
 
     return msg_obj
+
+
+def clean_commit(commit):
+    comment = re.compile(r"^\s*#.*$")
+    cleaned = ""
+
+    for line in commit.rstrip().split("\n"):
+        # Remove comments.
+        if not comment.match(line):
+            cleaned += line + "\n"
+
+    return cleaned
+
+
+def get_commit(options):
+    commit = ""
+
+    with fileinput.FileInput(files=(options["commit"]), mode="r") as input:
+        for line in input:
+            commit += line
+
+    return commit
+
+
+def main():
+    cc = ConventionalCommit(clean_commit(get_commit(get_configuration_options())))
+
+    if cc.exc:
+        exit(1)
+    else:
+        exit(0)
