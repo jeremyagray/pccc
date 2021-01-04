@@ -1,5 +1,6 @@
 {
-  "commit": "fix(parser): fix parser bug\n",
+  "raw": "fix(parser): fix parser bug\n",
+  "parsed": "fix(parser): fix parser bug\n",
   "header": {
     "type": "fix",
     "scope": "parser",

@@ -1,5 +1,4 @@
 {
-  "commit": "fix(parser)!: fix parser bug\n\nFix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug. Fix big parser bug. Fix big parser bug. Fix big parser\nbug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix\nbig parser bug.\n\nAlso, format your code with black or black, whichever you prefer.\n\nBREAKING CHANGE: This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.\nSigned-Off-By: Jeremy A Gray <jeremy.a.gray@gmail.com>\nSigned-Off-By: John Doe <jdoe@example.com>\n",
   "header": {
     "type": "fix",
     "scope": "parser",
@@ -30,5 +29,7 @@
       "separator": ": ",
       "value": "John Doe <jdoe@example.com>"
     }
-  ]
+  ],
+  "raw": "fix(parser)!: fix parser bug\n\nFix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug. Fix big parser bug. Fix big parser bug. Fix big parser\nbug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix\nbig parser bug.\n\nAlso, format your code with black or black, whichever you prefer.\n\nBREAKING CHANGE: This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.\nSigned-Off-By: Jeremy A Gray <jeremy.a.gray@gmail.com>\nSigned-Off-By: John Doe <jdoe@example.com>\n",
+  "parsed": "fix(parser)!: fix parser bug\n\nFix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug. Fix big parser bug. Fix big parser bug. Fix big parser\nbug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix\nbig parser bug.\n\nAlso, format your code with black or black, whichever you prefer.\n\nBREAKING CHANGE: This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.  This breaks the old grammar.\nSigned-Off-By: Jeremy A Gray <jeremy.a.gray@gmail.com>\nSigned-Off-By: John Doe <jdoe@example.com>\n"
 }

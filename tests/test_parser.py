@@ -10,7 +10,9 @@ import pytest
 
 sys.path.insert(0, "/home/gray/src/work/pccc")
 
-from pccc import ConventionalCommit as CC  # noqa: E402
+import pccc  # noqa: E402
+
+CC = pccc.ConventionalCommit
 
 
 def get_good_commits():
@@ -51,16 +53,26 @@ def get_bad_commits():
     "obj",
     get_good_commits(),
 )
+def test_clean_commit(obj):
+    assert pccc.clean_commit(obj[0]["raw"]) == obj[0]["parsed"]
+
+
+@pytest.mark.parametrize(
+    "obj",
+    get_good_commits(),
+)
 def test_good_commits(obj):
-    cc = CC(obj[0]["commit"])
+    clean = pccc.clean_commit(obj[0]["raw"])
+    cc = CC(clean)
+    # cc = CC(obj[0]["raw"])
 
     assert cc.header == obj[0]["header"]
     assert cc.body == obj[0]["body"]
     assert cc.breaking == obj[0]["breaking"]
     assert cc.footers == obj[0]["footers"]
 
-    assert cc.__str__() == obj[0]["commit"]
-    assert cc.__repr__() == fr"ConventionalCommit(raw={obj[0]['commit']})"
+    assert cc.__str__() == obj[0]["parsed"]
+    assert cc.__repr__() == fr"ConventionalCommit(raw={clean})"
 
 
 @pytest.mark.parametrize(
@@ -69,6 +81,6 @@ def test_good_commits(obj):
 )
 def test_bad_commits(raw):
     raw = """fix(bob): fix parser bug\n"""
-    cc = CC(raw)
+    cc = CC(pccc.clean_commit(raw))
 
     assert isinstance(cc.exc, pp.ParseException)
