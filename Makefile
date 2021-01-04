@@ -25,13 +25,13 @@
 .PHONY : commit lint pip test test-all
 
 test-all:
-	pytest -vv --black --flake8 --cov pccc --cov-report term --cov-report html
+	pytest -vv --black --flake8 --pydocstyle --cov pccc --cov-report term --cov-report html
 
 commit :
 	pre-commit run --all-files
 
 lint :
-	pytest --lint-only --black --flake8
+	pytest --lint-only --black --flake8 --pydocstyle
 
 pip :
 	pip install -r requirements.txt
