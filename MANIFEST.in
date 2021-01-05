@@ -1,0 +1,3 @@
+include README.md
+include tests/good/*.json
+include tests/bad/*.json
