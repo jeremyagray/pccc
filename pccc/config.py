@@ -1,9 +1,12 @@
+"""pccc configuration functions."""
+
 import argparse
 
 import toml
 
 
 def _create_argument_parser():
+    """Create an argparse argument parser."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         # "commit",
@@ -98,8 +101,19 @@ def _create_argument_parser():
     return parser
 
 
-# see toml source for TomlDecodeError defintion.
 def _load_configuration_file(filename="./pyproject.toml"):
+    """Load a configuration file, using the [tool.pccc] section.
+
+    Parameters
+    ----------
+    filename : string (optional)
+        Configuration file to load.
+
+    Returns
+    -------
+    dict
+       Configuration option keys and values.
+    """
     try:
         with open(filename, "r") as file:
             config = toml.load(file)
@@ -117,6 +131,7 @@ def _load_configuration_file(filename="./pyproject.toml"):
 
 
 def _update_option(orig, new):
+    """Update settings dict."""
     if new:
         return new
     else:
@@ -124,6 +139,16 @@ def _update_option(orig, new):
 
 
 def get_configuration_options():
+    """Load configuration options.
+
+    Load configuration options from defaults, file, then CLI, with
+    later values overriding previous values.
+
+    Returns
+    -------
+    dict
+        Configuration keys and values.
+    """
     # Parse the CLI options to make configuration file path available.
     args = _create_argument_parser().parse_args()
 
