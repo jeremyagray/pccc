@@ -35,9 +35,10 @@ setup(
         "pyparsing",
         "toml",
     ],
-    test_requires=[
+    tests_require=[
         "pytest",
         "pytest-black",
         "pytest-flake8",
+        "pytest-pydocstyle",
     ],
 )
