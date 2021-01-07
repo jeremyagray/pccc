@@ -292,7 +292,7 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         def _header_scope_handler(s, loc, tokens):
             """Get the header scope field."""
-            self.header["scope"] = tokens[0].lstrip("(").rstrip(")")
+            self.header["scope"] = tokens[1]
 
         def _header_desc_handler(s, loc, tokens):
             """Get the header description."""
@@ -342,19 +342,15 @@ class ConventionalCommitRunner(ConventionalCommit):
                 if self.body["longest"] < len(line):
                     self.body["longest"] = len(line)
 
-        def _list_to_option_re(list):
-            """Convert a list to an option regular expression string."""
-            return fr"({'|'.join(list)})"
-
         eos = pp.StringEnd()
 
         type = (
-            pp.Regex(_list_to_option_re(types))
+            pp.oneOf(types)
             .setResultsName("type", listAllMatches=True)
             .setParseAction(_header_type_handler)
         )
         scope = (
-            pp.Regex(r"\(" + _list_to_option_re(scopes) + r"\)")
+            ("(" + pp.oneOf(scopes) + ")")
             .setResultsName("scope", listAllMatches=True)
             .setParseAction(_header_scope_handler)
         )
@@ -383,9 +379,9 @@ class ConventionalCommitRunner(ConventionalCommit):
         )
 
         footer_sep = pp.Regex(r"(: | #)").setWhitespaceChars("	\n")
-        breaking_token = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName(
-            "breaking-token", listAllMatches=True
-        )
+        breaking_token = pp.oneOf(
+            ("BREAKING CHANGE", "BREAKING-CHANGE")
+        ).setResultsName("breaking-token", listAllMatches=True)
         footer_token = pp.oneOf(footers, caseless=True).setResultsName(
             "footer-token", listAllMatches=True
         )
