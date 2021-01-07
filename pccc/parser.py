@@ -314,7 +314,7 @@ class ConventionalCommitRunner(ConventionalCommit):
             for footer in tokens:
                 self.footers.append(
                     {
-                        "token": footer[0],
+                        "token": footer[0].lower().capitalize(),
                         "separator": footer[1],
                         "value": "\n".join(tokens[0][2]),
                     }
@@ -386,7 +386,7 @@ class ConventionalCommitRunner(ConventionalCommit):
         breaking_token = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName(
             "breaking-token", listAllMatches=True
         )
-        footer_token = pp.Regex(_list_to_option_re(footers)).setResultsName(
+        footer_token = pp.oneOf(footers, caseless=True).setResultsName(
             "footer-token", listAllMatches=True
         )
 

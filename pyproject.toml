@@ -60,11 +60,11 @@ scopes = [
 ]
 
 footers = [
-"Signed-Off-By"
+"signed-off-by"
 ]
 
 required_footers = [
-"Signed-Off-By"
+"signed-off-by"
 ]
 
 [tool.poetry]
