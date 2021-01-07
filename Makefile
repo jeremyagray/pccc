@@ -22,10 +22,19 @@
 #
 #***********************************************************************
 
-.PHONY : commit lint pip test test-all
+.PHONY : build clean commit lint pip test test-all
 
 test-all:
 	pytest -vv --black --flake8 --pydocstyle --cov pccc --cov-report term --cov-report html
+
+build :
+	pip install -q build
+	python -m build
+
+clean :
+	rm -rf build
+	rm -rf dist
+	rm -rf pccc.egg-info
 
 commit :
 	pre-commit run --all-files
