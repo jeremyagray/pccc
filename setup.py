@@ -14,7 +14,7 @@ def readme():
 
 setup(
     name="pccc",
-    version="0.2.0",
+    version="0.3.0",
     description="Python Conventional Commit Checker",
     long_description=readme(),
     classifiers=[

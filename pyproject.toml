@@ -72,7 +72,7 @@ required_footers = [
 authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
 description = "pccc:   the Python Conventional Commit Checker"
 name = "pccc"
-version = "0.2.0"
+version = "0.3.0"
 
 [tool.poetry.dependencies]
 
