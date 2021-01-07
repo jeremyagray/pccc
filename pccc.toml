@@ -1,0 +1,29 @@
+[tool.pccc]
+
+header_length = 50
+body_length = 72
+rewrap = true
+spell_check = false
+repair = false
+
+types = [
+"build",
+"ci",
+"docs",
+"feat",
+"fix",
+"perf",
+"refactor",
+"release",
+"style",
+"test"
+]
+
+scopes = [
+"config",
+"parser"
+]
+
+footers = [
+"signed-off-by"
+]
