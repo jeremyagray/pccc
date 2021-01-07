@@ -29,7 +29,7 @@ setup(
     license="GPL-3.0-or-later",
     packages=["pccc"],
     entry_points={
-        "console_scripts": ["pccc=pccc.cli:main"],
+        "console_scripts": ["pccc=pccc:main"],
     },
     install_requires=[
         "pyparsing",
