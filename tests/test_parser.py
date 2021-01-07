@@ -44,7 +44,7 @@ def get_bad_commits():
                 with open(entry.path, "r") as file:
                     for line in file:
                         commit += line
-                commits.append(tuple(commit))
+                commits.append(tuple([commit]))
 
     return commits
 
@@ -53,26 +53,20 @@ def get_bad_commits():
     "obj",
     get_good_commits(),
 )
-def test_clean_commit(obj):
-    assert pccc.clean_commit(obj[0]["raw"]) == obj[0]["parsed"]
-
-
-@pytest.mark.parametrize(
-    "obj",
-    get_good_commits(),
-)
 def test_good_commits(obj):
-    clean = pccc.clean_commit(obj[0]["raw"])
-    cc = CC(clean)
-    # cc = CC(obj[0]["raw"])
+    ccr = pccc.ConventionalCommitRunner()
+    ccr.options.load_file()
+    ccr.raw = obj[0]["raw"]
+    ccr.clean()
+    ccr.parse()
 
-    assert cc.header == obj[0]["header"]
-    assert cc.body == obj[0]["body"]
-    assert cc.breaking == obj[0]["breaking"]
-    assert cc.footers == obj[0]["footers"]
+    assert ccr.header == obj[0]["header"]
+    assert ccr.body == obj[0]["body"]
+    assert ccr.breaking == obj[0]["breaking"]
+    assert ccr.footers == obj[0]["footers"]
 
-    assert cc.__str__() == obj[0]["parsed"]
-    assert cc.__repr__() == fr"ConventionalCommit(raw={clean})"
+    assert str(ccr) == obj[0]["parsed"]
+    assert repr(ccr) == fr"ConventionalCommit(raw={ccr.raw})"
 
 
 @pytest.mark.parametrize(
@@ -80,7 +74,10 @@ def test_good_commits(obj):
     get_bad_commits(),
 )
 def test_bad_commits(raw):
-    raw = """fix(bob): fix parser bug\n"""
-    cc = CC(pccc.clean_commit(raw))
+    ccr = pccc.ConventionalCommitRunner()
+    ccr.options.load_file()
+    ccr.raw = raw[0]
+    ccr.clean()
+    ccr.parse()
 
-    assert isinstance(cc.exc, pp.ParseException)
+    assert isinstance(ccr.exc, pp.ParseException)

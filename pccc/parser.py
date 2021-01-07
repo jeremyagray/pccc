@@ -2,24 +2,30 @@
 
 import copy
 import fileinput
+
+# import pyenchant  # spell check
 import re
+import textwrap
 
 import pyparsing as pp
 
-from .config import get_configuration_options
-
-# import textwrap  # wrap text
-# import pyenchant  # spell check
+# from .config import get_configuration_options
+from .config import Config
 
 
 class ConventionalCommit:
     """Class describing a conventional commit.
 
-    Parses a cleaned commit message and stores the parsed information
-    or parser exceptions for further use.
+    Data structure containg the raw commit message, cleaned commit
+    message, parsed conventional commit tokens, and parser exceptions
+    for further use.
 
     Attributes
     ----------
+    raw : string
+       An unprocessed commit message.
+    cleaned : string
+       A cleaned, unparsed commit message.
     header : dict
         Header fields and values.
     header["type"] : string
@@ -52,36 +58,42 @@ class ConventionalCommit:
     footers : [dict]
         An array of footer dicts, which are identical to the breaking
         dicts, without a "flag" field.
+    options : object
+        A Config() object containing current configuration options.
+    exc : object
+        ParseException raised during parsing, or None.
     """
 
-    def __init__(self, raw):
+    def __init__(self):
         """Create a ConventionalCommit.
 
-        Create a ConventionalCommit by parsing a cleaned commit
-        message string.  Parsing exceptions are caught and stored for
-        further use.
-
-        Parameters
-        ----------
-        raw : string
-            A cleaned, unparsed commit message.
+        Create a ConventionalCommit.
 
         Returns
         -------
         object
             A ConventionalCommit.
         """
-        self.raw = raw
-        try:
-            cc = _parse_commit(raw)
-            self.header = copy.deepcopy(cc["header"])
-            self.body = copy.deepcopy(cc["body"])
-            self.breaking = copy.deepcopy(cc["breaking"])
-            self.footers = copy.deepcopy(cc["footers"])
-            self.exc = None
-        except pp.ParseException as exc:
-            self.exc = exc
-            print(exc)
+        self.raw = ""
+        self.cleaned = ""
+        self.header = {
+            "type": "",
+            "scope": "",
+            "description": "",
+            "length": 0,
+        }
+        self.body = {
+            "paragraphs": [],
+            "longest": 0,
+        }
+        self.breaking = {
+            "flag": False,
+            "token": "",
+            "separator": "",
+            "value": "",
+        }
+        self.footers = []
+        self.exc = None
 
     def __str__(self):
         """Stringify a parsed commit.
@@ -163,306 +175,281 @@ class ConventionalCommit:
         return fr"ConventionalCommit(raw={self.raw})"
 
 
-def _list_to_option_re(list):
-    """Convert a list to an option regular expression string."""
-    return fr"({'|'.join(list)})"
+class ConventionalCommitRunner(ConventionalCommit):
+    """ConventionalCommit subclass with methods for execution.
 
+    Data structure containg the raw commit message, cleaned commit
+    message, parsed conventional commit tokens, and parser exceptions
+    for further use.
 
-def _parse_commit(raw):
-    r"""Parse a conventional commit message.
-
-    Parse a conventional commit message according to the
-    `specification
-    <https://www.conventionalcommits.org/en/v1.0.0/#specification>`,
-    including user defined types, scopes, and footers.
-
-    BNF for conventional commit (v1.0.0):
-        type :: ( feat | fix | 'user defined types' )
-        scope :: ( '(' 'user defined scopes' ')' )
-        header-breaking-flag :: !
-        header-sep :: ': '
-        header-desc :: .*
-        header :: type scope? header-breaking-flag? header-sep header-desc
-        breaking-token :: ( BREAKING CHANGE | BREAKING-CHANGE )
-        footer-sep :: ( ': ' | ' #' )
-        breaking-value :: .*
-        breaking :: breaking-token footer-sep breaking-value
-        footer-token :: ( 'user defined footers' )
-        footer-value :: .*
-        footer :: footer-token footer-sep footer-value
-        line :: .*
-        newline :: '\n'
-        skip :: newline newline
-        par :: ( line newline )+
-        body :: skip par+
-        commit-msg :: header body? breaking? footer*
-
-    Parameters
+    Attributes
     ----------
-    raw : string
-        A string representing the cleaned, unparsed commit message.
-
-    Returns
-    -------
-    dict
-        The parsed fields of the commit.
+    options : object
+        A Config() object for handling configuration.
     """
-    pp.ParserElement.defaultWhitespaceChars = "\t"
 
-    types = [
-        "ci",
-        "docs",
-        "feat",
-        "fix",
-        "perf",
-        "refactor",
-        "style",
-        "test",
-    ]
+    def __init__(self):
+        """Create a ConventionalCommitRunner.
 
-    scopes = [
-        "foo",
-        "bar",
-        "baz",
-        "parser",
-    ]
+        Create a ConventionalCommitRunner and adds a Config() object
+        for configuration management.
 
-    footers = [
-        "Signed-Off-By",
-    ]
-
-    msg_obj = {
-        "header": {
-            "type": "",
-            "scope": "",
-            "description": "",
-            "length": 0,
-        },
-        "body": {
-            "paragraphs": [],
-            "longest": 0,
-        },
-        "breaking": {
-            "flag": False,
-            "token": "",
-            "separator": "",
-            "value": "",
-        },
-        "footers": [
-            # {
-            #     "token": "",
-            #     "separator": "",
-            #     "value": "",
-            # },
-        ],
-    }
-
-    def _header_handler(s, loc, tokens):
-        """Find the length of the header."""
-        tokens[0].append(tokens[0].pop()[0])
-        msg_obj["header"]["length"] = len("".join(tokens[0]))
-
-    def _header_type_handler(s, loc, tokens):
-        """Get the header type field."""
-        msg_obj["header"]["type"] = tokens[0]
-
-    def _header_scope_handler(s, loc, tokens):
-        """Get the header scope field."""
-        msg_obj["header"]["scope"] = tokens[0].lstrip("(").rstrip(")")
-
-    def _header_desc_handler(s, loc, tokens):
-        """Get the header description."""
-        msg_obj["header"]["description"] = tokens[0][0].strip()
-
-    def _breaking_flag_handler(s, loc, tokens):
-        """Set the breaking flag state."""
-        if tokens[0] == "!":
-            msg_obj["breaking"]["flag"] = True
-
-    def _breaking_handler(s, loc, tokens):
-        """Get the breaking change field values."""
-        msg_obj["breaking"]["token"] = tokens[0][0]
-        msg_obj["breaking"]["separator"] = tokens[0][1]
-        msg_obj["breaking"]["value"] = "\n".join(tokens[0][2])
-
-    def _footer_handler(s, loc, tokens):
-        """Build the footer dicts from field values."""
-        for footer in tokens:
-            msg_obj["footers"].append(
-                {
-                    "token": footer[0],
-                    "separator": footer[1],
-                    "value": "\n".join(tokens[0][2]),
-                }
-            )
-
-    def _body_handler(s, loc, tokens):
-        """Process the body tokens.
-
-        Calculate the longest body line and store the body paragraphs.
+        Returns
+        -------
+        object
+            A ConventionalCommitRunner.
         """
-        nll = False
-        par = []
-        for line in tokens:
-            if nll and line == "\n":
-                msg_obj["body"]["paragraphs"].append("".join(par))
-                par = []
-            else:
-                par.append(line)
+        # Add a Config() object.
+        self.options = Config()
 
-            if line == "\n":
-                nll = True
-            else:
-                nll = False
+        super().__init__()
 
-            if msg_obj["body"]["longest"] < len(line):
-                msg_obj["body"]["longest"] = len(line)
+    def clean(self):
+        r"""Clean a commit before parsing.
 
-    eos = pp.StringEnd()
+        Remove all comment lines (matching the regular expression
+        "^\\s*#.*$) from a commit message before parsing.
+        """
+        comment = re.compile(r"^\s*#.*$")
+        cleaned = ""
 
-    type = (
-        pp.Regex(_list_to_option_re(types))
-        .setResultsName("type", listAllMatches=True)
-        .setParseAction(_header_type_handler)
-    )
-    scope = (
-        pp.Regex(r"\(" + _list_to_option_re(scopes) + r"\)")
-        .setResultsName("scope", listAllMatches=True)
-        .setParseAction(_header_scope_handler)
-    )
-    header_breaking_flag = (
-        pp.Regex(r"!")
-        .setResultsName("header-breaking-flag", listAllMatches=True)
-        .setParseAction(_breaking_flag_handler)
-    )
-    header_sep = pp.Regex(r": ")
-    newline = pp.LineEnd().suppress()
-    header_desc = (
-        pp.Group(~newline + ~eos + pp.Regex(r".*"))
-        .setResultsName("header-desc", listAllMatches=True)
-        .setParseAction(_header_desc_handler)
-    )
-    header = (
-        pp.Group(
-            type
-            + pp.Optional(scope)
-            + pp.Optional(header_breaking_flag)
-            + header_sep
-            + header_desc
+        for line in self.raw.rstrip().split("\n"):
+            # Remove comments.
+            if not comment.match(line):
+                cleaned += line + "\n"
+
+        self.cleaned = cleaned
+
+    def get(self):
+        r"""Read a commit from a file or STDIN.
+
+        Loads a the commit message from the file specified in the
+        configuration, defaulting to STDIN.
+        """
+        commit = ""
+        with fileinput.FileInput(files=(self.options.commit), mode="r") as input:
+            for line in input:
+                commit += line
+
+        self.raw = commit
+
+    def wrap(self):
+        """Wrap a commit body to a given length.
+
+        Wraps a commit body to a given length, optionally rewrapping
+        the commit if required.
+        """
+        self.body["paragraphs"] = list(
+            map(
+                lambda item: "\n".join(textwrap.wrap(item, self.options.body_length)),
+                self.body["paragraphs"],
+            )
         )
-        .setResultsName("header", listAllMatches=True)
-        .setParseAction(_header_handler)
-    )
 
-    footer_sep = pp.Regex(r"(: | #)").setWhitespaceChars("	\n")
-    breaking_token = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName(
-        "breaking-token", listAllMatches=True
-    )
-    footer_token = pp.Regex(_list_to_option_re(footers)).setResultsName(
-        "footer-token", listAllMatches=True
-    )
+    def parse(self):
+        r"""Parse a conventional commit message.
 
-    breaking_value = (
-        pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
-        .setWhitespaceChars(" 	")
-        .setResultsName("breaking-value", listAllMatches=True)
-    )
-    breaking = (
-        pp.Group(breaking_token + footer_sep + breaking_value)
-        .setResultsName("breaking", listAllMatches=True)
-        .setParseAction(_breaking_handler)
-    )
+        Parse a conventional commit message according to the
+        `specification
+        <https://www.conventionalcommits.org/en/v1.0.0/#specification>`,
+        including user defined types, scopes, and footers.
 
-    footer_value = (
-        pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
-        .setWhitespaceChars(" 	")
-        .setResultsName("footer-value", listAllMatches=True)
-    )
-    footer = (
-        pp.Group(footer_token + footer_sep + footer_value)
-        .setResultsName("footers", listAllMatches=True)
-        .setParseAction(_footer_handler)
-    )
+        BNF for conventional commit (v1.0.0):
+            type :: ( feat | fix | 'user defined types' )
+            scope :: ( '(' 'user defined scopes' ')' )
+            header-breaking-flag :: !
+            header-sep :: ': '
+            header-desc :: .*
+            header :: type scope? header-breaking-flag? header-sep header-desc
+            breaking-token :: ( BREAKING CHANGE | BREAKING-CHANGE )
+            footer-sep :: ( ': ' | ' #' )
+            breaking-value :: .*
+            breaking :: breaking-token footer-sep breaking-value
+            footer-token :: ( 'user defined footers' )
+            footer-value :: .*
+            footer :: footer-token footer-sep footer-value
+            line :: .*
+            newline :: '\n'
+            skip :: newline newline
+            par :: ( line newline )+
+            body :: skip par+
+            commit-msg :: header body? breaking? footer*
+        """
+        pp.ParserElement.defaultWhitespaceChars = "\t"
 
-    footer_types = pp.Group(breaking ^ footer)
+        types = self.options.types
+        scopes = self.options.scopes
+        footers = self.options.footers
 
-    line = pp.Regex(r".*")
-    bnewline = pp.LineEnd()
-    skip = bnewline + bnewline
-    par = pp.OneOrMore(~eos + ~footer_types + ~bnewline + line + bnewline)
-    body = skip + pp.OneOrMore(
-        ~eos + ~footer_types + par + pp.Optional(bnewline)
-    ).setParseAction(_body_handler)
+        def _header_handler(s, loc, tokens):
+            """Find the length of the header."""
+            tokens[0].append(tokens[0].pop()[0])
+            self.header["length"] = len("".join(tokens[0]))
 
-    commit_msg = (
-        header + pp.Optional(body) + pp.Optional(breaking) + pp.ZeroOrMore(footer)
-    ).setResultsName("commit-msg", listAllMatches=True)
+        def _header_type_handler(s, loc, tokens):
+            """Get the header type field."""
+            self.header["type"] = tokens[0]
 
-    commit_msg.parseString(raw)
+        def _header_scope_handler(s, loc, tokens):
+            """Get the header scope field."""
+            self.header["scope"] = tokens[0].lstrip("(").rstrip(")")
 
-    return msg_obj
+        def _header_desc_handler(s, loc, tokens):
+            """Get the header description."""
+            self.header["description"] = tokens[0][0].strip()
 
+        def _breaking_flag_handler(s, loc, tokens):
+            """Set the breaking flag state."""
+            if tokens[0] == "!":
+                self.breaking["flag"] = True
 
-def clean_commit(commit):
-    r"""Clean a commit before parsing.
+        def _breaking_handler(s, loc, tokens):
+            """Get the breaking change field values."""
+            self.breaking["token"] = tokens[0][0]
+            self.breaking["separator"] = tokens[0][1]
+            self.breaking["value"] = "\n".join(tokens[0][2])
 
-    Remove all comment lines (matching the regular expression
-    "^\\s*#.*$) from a commit message before parsing.
+        def _footer_handler(s, loc, tokens):
+            """Build the footer dicts from field values."""
+            for footer in tokens:
+                self.footers.append(
+                    {
+                        "token": footer[0],
+                        "separator": footer[1],
+                        "value": "\n".join(tokens[0][2]),
+                    }
+                )
 
-    Parameters
-    ----------
-    commit : string
-        The uncleaned, unparsed commit message.
+        def _body_handler(s, loc, tokens):
+            """Process the body tokens.
 
-    Returns
-    -------
-    string
-        The cleaned commit.
-    """
-    comment = re.compile(r"^\s*#.*$")
-    cleaned = ""
+            Calculate the longest body line and store the body paragraphs.
+            """
+            nll = False
+            par = []
+            for line in tokens:
+                if nll and line == "\n":
+                    self.body["paragraphs"].append("".join(par))
+                    par = []
+                else:
+                    par.append(line)
 
-    for line in commit.rstrip().split("\n"):
-        # Remove comments.
-        if not comment.match(line):
-            cleaned += line + "\n"
+                if line == "\n":
+                    nll = True
+                else:
+                    nll = False
 
-    return cleaned
+                if self.body["longest"] < len(line):
+                    self.body["longest"] = len(line)
 
+        def _list_to_option_re(list):
+            """Convert a list to an option regular expression string."""
+            return fr"({'|'.join(list)})"
 
-def get_commit(options):
-    r"""Read a commit from a file or STDIN.
+        eos = pp.StringEnd()
 
-    Parameters
-    ----------
-    options : dict
-        The configuration options, containing the commit message
-        filename.
+        type = (
+            pp.Regex(_list_to_option_re(types))
+            .setResultsName("type", listAllMatches=True)
+            .setParseAction(_header_type_handler)
+        )
+        scope = (
+            pp.Regex(r"\(" + _list_to_option_re(scopes) + r"\)")
+            .setResultsName("scope", listAllMatches=True)
+            .setParseAction(_header_scope_handler)
+        )
+        header_breaking_flag = (
+            pp.Regex(r"!")
+            .setResultsName("header-breaking-flag", listAllMatches=True)
+            .setParseAction(_breaking_flag_handler)
+        )
+        header_sep = pp.Regex(r": ")
+        newline = pp.LineEnd().suppress()
+        header_desc = (
+            pp.Group(~newline + ~eos + pp.Regex(r".*"))
+            .setResultsName("header-desc", listAllMatches=True)
+            .setParseAction(_header_desc_handler)
+        )
+        header = (
+            pp.Group(
+                type
+                + pp.Optional(scope)
+                + pp.Optional(header_breaking_flag)
+                + header_sep
+                + header_desc
+            )
+            .setResultsName("header", listAllMatches=True)
+            .setParseAction(_header_handler)
+        )
 
-    Returns
-    -------
-    string
-        The uncleaned, unparsed commit message.
-    """
-    commit = ""
+        footer_sep = pp.Regex(r"(: | #)").setWhitespaceChars("	\n")
+        breaking_token = pp.Regex(r"(BREAKING CHANGE|BREAKING-CHANGE)").setResultsName(
+            "breaking-token", listAllMatches=True
+        )
+        footer_token = pp.Regex(_list_to_option_re(footers)).setResultsName(
+            "footer-token", listAllMatches=True
+        )
 
-    with fileinput.FileInput(files=(options["commit"]), mode="r") as input:
-        for line in input:
-            commit += line
+        breaking_value = (
+            pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
+            .setWhitespaceChars(" 	")
+            .setResultsName("breaking-value", listAllMatches=True)
+        )
+        breaking = (
+            pp.Group(breaking_token + footer_sep + breaking_value)
+            .setResultsName("breaking", listAllMatches=True)
+            .setParseAction(_breaking_handler)
+        )
 
-    return commit
+        footer_value = (
+            pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
+            .setWhitespaceChars(" 	")
+            .setResultsName("footer-value", listAllMatches=True)
+        )
+        footer = (
+            pp.Group(footer_token + footer_sep + footer_value)
+            .setResultsName("footers", listAllMatches=True)
+            .setParseAction(_footer_handler)
+        )
+
+        footer_types = pp.Group(breaking ^ footer)
+
+        line = pp.Regex(r".*")
+        bnewline = pp.LineEnd()
+        skip = bnewline + bnewline
+        par = pp.OneOrMore(~eos + ~footer_types + ~bnewline + line + bnewline)
+        body = skip + pp.OneOrMore(
+            ~eos + ~footer_types + par + pp.Optional(bnewline)
+        ).setParseAction(_body_handler)
+
+        commit_msg = (
+            header + pp.Optional(body) + pp.Optional(breaking) + pp.ZeroOrMore(footer)
+        ).setResultsName("commit-msg", listAllMatches=True)
+
+        try:
+            commit_msg.parseString(self.cleaned)
+        except pp.ParseException as exc:
+            self.exc = exc
+            print(exc)
+
+        return
 
 
 def main():
     """Run the default program.
 
-    Calls get_commit() and clean_commit() on the commit message,
-    passing the result to ConventionalCommit for parsing.  Exits the
-    program with a 0 for success, 1 for failure.
+    Creates a ConventionalCommitRunner, loads the configuration
+    options, gets,,cleans, and parses the commit, checks for
+    exceptions, and exits the program with a 0 for success, 1 for
+    failure.
     """
-    cc = ConventionalCommit(clean_commit(get_commit(get_configuration_options())))
+    runner = ConventionalCommitRunner()
+    runner.options.load()
+    runner.get()
+    runner.clean()
+    runner.parse()
 
-    if cc.exc:
+    if runner.exc:
         exit(1)
     else:
         exit(0)

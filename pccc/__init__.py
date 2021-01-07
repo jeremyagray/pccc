@@ -14,13 +14,17 @@ Examples
 
 >>> # From script:
 >>> import pccc
->>> options = pccc.get_configuration_options()
->>> commit = pccc.get_commit(options)
->>> commit = pccc.clean_commit(commit)
->>> cc = pccc.ConventionalCommit(commit)
+>>> ccr = pccc.ConventionalCommitRunner()
+>>> # Load configuration.
+>>> ccr.options.load()
+>>> # Get commit.
+>>> ccr.get()
+>>> # Clean commit.
+>>> ccr.clean()
+>>> # Parse commit.
+>>> ccr.parse()
 """
-from .config import get_configuration_options
+from .config import Config
 from .parser import ConventionalCommit
-from .parser import clean_commit
-from .parser import get_commit
+from .parser import ConventionalCommitRunner
 from .parser import main
