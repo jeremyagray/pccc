@@ -4,9 +4,12 @@
 *~
 
 # Python.
+*.egg-info
 *.pyc
 .coverage
 .pytest_cache
 __pycache__
+build
+dist
 docs/_build
 htmlcov
