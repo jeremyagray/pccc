@@ -186,7 +186,7 @@ class Config:
         """
         try:
             self.update(**_load_file(self.config_file))
-        except toml.TomlDecodeError:
+        except (FileNotFoundError, toml.TomlDecodeError):
             print(
                 f"Unable to load configuration file {self.config_file},"
                 " using defaults and CLI options."
@@ -217,7 +217,7 @@ class Config:
 
         try:
             self.update(**_load_file(self.config_file))
-        except toml.TomlDecodeError:
+        except (FileNotFoundError, toml.TomlDecodeError):
             print(
                 f"Unable to load configuration file {self.config_file},"
                 " using defaults and CLI options."
@@ -246,6 +246,9 @@ def _load_file(filename="./pyproject.toml"):
     ------
     TomlDecodeError
         Raised if there are problems decoding the configuration file.
+    FileNotFoundError
+        Raised if the configuration file does not exist or is not
+        readable.
     """
     try:
         with open(filename, "r") as file:
@@ -258,6 +261,9 @@ def _load_file(filename="./pyproject.toml"):
         )
         print(lines[error.lineno - 1])
         print(error.msg)
+        raise
+    except FileNotFoundError as error:
+        print(f"{error.strerror}: {error.filename}")
         raise
 
     empty_options = {
