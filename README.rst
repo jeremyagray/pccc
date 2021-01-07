@@ -30,27 +30,35 @@ Roadmap
 #. Github issue template based off current ``tests/good/*.json``
    files, with guidelines. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
+
    * fail if over
    * rewrap if over
    * do nothing if fine
    * rewrap if fine
+
 #. Implement spell checking. (target: 0.6.0)
+
    * will not autocorrect
    * communication: kick back to editor on errors, with comment line
      to indicate acceptance
+
 #. Implement simple reformatting. (target: 0.7.0)
+
    * footer separator as ": " and not " #"
    * "BREAKING-CHANGE" not "BREAKING CHANGE"
    * set breaking flag (!) and "BREAKING-CHANGE"
    * correct token capitalization ("BREAKING-CHANGE" not
      "breaking-change" or "Breaking-Change"; "Signed-off-by" not
      "Signed-Off-By" or "signed-off-by")
+
 #. Implement partial parsing on failure for correction and improved
    exception handling. (target: 0.9.0 or later)
+
    * header partial parsing
    * body partial parsing
    * breaking change partial parsing
    * footer partial parsing
+
 #. Implement custom hooks for handling per-project footers. (target:
    0.9.0 or later)
 
@@ -94,7 +102,7 @@ Copyright and License
 =====================
 
 SPDX-License-Identifier: `GPL-3.0-or-later
-https://spdx.org/licenses/GPL-3.0-or-later.html`_
+<https://spdx.org/licenses/GPL-3.0-or-later.html>`_
 
 pccc, the Python Conventional Commit Checker.
 Copyright (C) 2020-2021 `Jeremy A Gray <jeremy.a.gray@gmail.com>`_.
