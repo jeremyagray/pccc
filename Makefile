@@ -49,7 +49,7 @@ test:
 	pytest --cov pccc --cov-report term
 
 upload:
-	python3 -m twine upload --verbose --repository pypi dist/*
+	python3 -m twine upload --verbose dist/*
 
 upload-test:
 	python3 -m twine upload --verbose --repository testpypi dist/*
