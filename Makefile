@@ -22,7 +22,7 @@
 #
 #***********************************************************************
 
-.PHONY : build clean commit lint pip test test-all
+.PHONY : build clean commit lint pip upload upload-test test test-all
 
 test-all:
 	pytest -vv --black --flake8 --pydocstyle --cov pccc --cov-report term --cov-report html
@@ -47,3 +47,9 @@ pip :
 
 test:
 	pytest --cov pccc --cov-report term
+
+upload:
+	python3 -m twine upload --verbose --repository pypi dist/*
+
+upload-test:
+	python3 -m twine upload --verbose --repository testpypi dist/*
