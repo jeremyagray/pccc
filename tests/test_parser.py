@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Parser unit tests."""
 
 import json
 import os
@@ -16,6 +17,7 @@ CC = pccc.ConventionalCommit
 
 
 def get_good_commits():
+    """Load good commit data for tests."""
     commits = []
     json_file_re = re.compile(r"\d{4}\.json$")
 
@@ -35,6 +37,7 @@ def get_good_commits():
 
 
 def get_bad_commits():
+    """Load bad commit data for tests."""
     commits = []
 
     with os.scandir("./tests/bad") as it:
@@ -54,6 +57,7 @@ def get_bad_commits():
     get_good_commits(),
 )
 def test_good_commits(obj):
+    """Test good commits."""
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load_file()
     ccr.raw = obj[0]["raw"]
@@ -74,6 +78,7 @@ def test_good_commits(obj):
     get_bad_commits(),
 )
 def test_bad_commits(raw):
+    """Test bad commits."""
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load_file()
     ccr.raw = raw[0]
