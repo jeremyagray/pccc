@@ -15,27 +15,27 @@ class Config:
     Attributes
     ----------
     commit : string
-        Commit message location; default is STDIN.
+        Commit message location; default is ``STDIN``.
     config_file : string
-        Configuration file path; default is pyproject.toml.
+        Configuration file path; default is ``pyproject.toml``.
     header_length : int
        Maximum header length; default is 50.
     body_length : int
        Maximum body line length; default is 72.
     spell_check : boolean
-      Spell check header and body; default is False.
+      Spell check header and body; default is ``False``.
     rewrap : boolean
-      Rewrap body; default is False.
+      Rewrap body; default is ``False``.
     repair : boolean
-      Repair commit, implying spell check and rewrap; default is False.
+      Repair commit, implying spell check and rewrap; default is ``False``.
     types : [string]
-        List of header types; default is ['feat', 'fix'].
+        List of header types; default is ``['feat', 'fix']``.
     scopes : [string]
-        List of header scopes; default is [].
+        List of header scopes; default is ``[]``.
     footers : [string]
-        List of footers; default is [].
+        List of footers; default is ``[]``.
     required_footers : [string]
-        List of required footers; default is [].
+        List of required footers; default is ``[]``.
     """
 
     def __init__(
@@ -52,9 +52,9 @@ class Config:
         footers=[],
         required_footers=[],
     ):
-        """Create a Config() object.
+        """Create a ``Config()`` object.
 
-        Create a default Config() object.
+        Create a default ``Config()`` object.
 
         Returns
         -------
@@ -74,16 +74,16 @@ class Config:
         self.required_footers = required_footers
 
     def __str__(self):
-        """Stringify a Config() object.
+        """Stringify a ``Config()`` object.
 
-        String representation of a Config() object, as the [tool.pccc]
-        section of a pyproject.toml file.
+        String representation of a ``Config()`` object, as the
+        ``[tool.pccc]`` section of a pyproject.toml file.
 
         Returns
         -------
         string
             The current configuration, as the [tool.pccc] section of a
-            pyproject.toml file.
+            ``pyproject.toml`` file.
         """
         rs = "[tool.pccc]\n"
         rs += "\n"
@@ -134,7 +134,7 @@ class Config:
         return rs
 
     def __repr__(self):
-        """Representation of a Config() object."""
+        """Representation of a ``Config()`` object."""
         return (
             f'Config(commit="{self.commit}", '
             f'config_file="{self.config_file}", '
@@ -165,7 +165,7 @@ class Config:
         Returns
         -------
         object
-            A new Config() object.
+            A new ``Config()`` object.
         """
         for (k, v) in kwargs.items():
             if hasattr(self, k) and v is not None:
@@ -179,10 +179,11 @@ class Config:
         Load configuration options from file, with later values
         overriding previous values.
 
-        Unset values are explicitly None at each level.
+        Unset values are explicitly ``None`` at each level.
 
-        Handles any TomlDecodeError exceptions that arise during
-        loading of configuration file by ingoring the file.
+        Handles any ``FileNotFound`` or ``TomlDecodeError`` exceptions
+        that arise during loading of configuration file by ignoring
+        the file.
         """
         try:
             self.update(**_load_file(self.config_file))
@@ -201,10 +202,11 @@ class Config:
         file (either default or specified on CLI), then CLI, with
         later values overriding previous values.
 
-        Unset values are explicitly None at each level.
+        Unset values are explicitly ``None`` at each level.
 
-        Handles any TomlDecodeError exceptions that arise during
-        loading of configuration file by ingoring the file.
+        Handles any ``FileNotFound`` or ``TomlDecodeError`` exceptions
+        that arise during loading of configuration file by ignoring
+        the file.
         """
         # Parse the CLI options to make configuration file path available.
         args = _create_argument_parser().parse_args()
@@ -229,7 +231,7 @@ class Config:
 
 
 def _load_file(filename="./pyproject.toml"):
-    """Load a configuration file, using the [tool.pccc] section.
+    """Load a configuration file, using the ``[tool.pccc]`` section.
 
     Parameters
     ----------
@@ -240,7 +242,7 @@ def _load_file(filename="./pyproject.toml"):
     -------
     dict
        Configuration option keys and values, with unset values
-       explicitly set to None.
+       explicitly set to ``None``.
 
     Raises
     ------

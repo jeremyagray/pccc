@@ -61,18 +61,18 @@ class ConventionalCommit:
     options : object
         A Config() object containing current configuration options.
     exc : object
-        ParseException raised during parsing, or None.
+        ParseException raised during parsing, or ``None``.
     """
 
     def __init__(self):
-        """Create a ConventionalCommit.
+        """Create a ``ConventionalCommit()``.
 
-        Create a ConventionalCommit.
+        Create a ``ConventionalCommit()``.
 
         Returns
         -------
         object
-            A ConventionalCommit.
+            A ``ConventionalCommit()``.
         """
         self.raw = ""
         self.cleaned = ""
@@ -165,39 +165,40 @@ class ConventionalCommit:
         return "\n".join(footers)
 
     def __repr__(self):
-        """Recreate a ConventionalCommit object.
+        """Recreate a ``ConventionalCommit()``.
 
         Returns
         -------
         string
-            A string representation of the ConventionalCommit object.
+            A string representation of a ``ConventionalCommit()``.
         """
         return fr"ConventionalCommit(raw={self.raw})"
 
 
 class ConventionalCommitRunner(ConventionalCommit):
-    """ConventionalCommit subclass with methods for execution.
+    """``ConventionalCommit()`` subclass with methods for execution.
 
-    Data structure containg the raw commit message, cleaned commit
-    message, parsed conventional commit tokens, and parser exceptions
-    for further use.
+    A ``ConventionalCommit()`` with addtional methods for loading,
+    cleaning, and parsing a raw commit message as well as an
+    ``Config()`` attribute for loading and accessing configuration
+    information.
 
     Attributes
     ----------
     options : object
-        A Config() object for handling configuration.
+        A ``Config()`` object for handling configuration.
     """
 
     def __init__(self):
-        """Create a ConventionalCommitRunner.
+        """Create a ``ConventionalCommitRunner()``.
 
-        Create a ConventionalCommitRunner and adds a Config() object
-        for configuration management.
+        Create a ``ConventionalCommitRunner()`` and adds a
+        ``Config()`` object for configuration management.
 
         Returns
         -------
         object
-            A ConventionalCommitRunner.
+            A ``ConventionalCommitRunner()``.
         """
         # Add a Config() object.
         self.options = Config()
@@ -208,7 +209,7 @@ class ConventionalCommitRunner(ConventionalCommit):
         r"""Clean a commit before parsing.
 
         Remove all comment lines (matching the regular expression
-        "^\\s*#.*$) from a commit message before parsing.
+        ``"^\\s*#.*$"``) from a commit message before parsing.
         """
         comment = re.compile(r"^\s*#.*$")
         cleaned = ""
@@ -221,10 +222,10 @@ class ConventionalCommitRunner(ConventionalCommit):
         self.cleaned = cleaned
 
     def get(self):
-        r"""Read a commit from a file or STDIN.
+        r"""Read a commit from a file or ``STDIN``.
 
         Loads a the commit message from the file specified in the
-        configuration, defaulting to STDIN.
+        configuration, defaulting to ``STDIN``.
         """
         commit = ""
         with fileinput.FileInput(files=(self.options.commit), mode="r") as input:
@@ -234,11 +235,7 @@ class ConventionalCommitRunner(ConventionalCommit):
         self.raw = commit
 
     def wrap(self):
-        """Wrap a commit body to a given length.
-
-        Wraps a commit body to a given length, optionally rewrapping
-        the commit if required.
-        """
+        """Wrap a commit body to a given length."""
         self.body["paragraphs"] = list(
             map(
                 lambda item: "\n".join(textwrap.wrap(item, self.options.body_length)),
@@ -251,10 +248,11 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         Parse a conventional commit message according to the
         `specification
-        <https://www.conventionalcommits.org/en/v1.0.0/#specification>`,
+        <https://www.conventionalcommits.org/en/v1.0.0/#specification>`_,
         including user defined types, scopes, and footers.
 
-        BNF for conventional commit (v1.0.0):
+        BNF for conventional commit (v1.0.0)::
+
             type :: ( feat | fix | 'user defined types' )
             scope :: ( '(' 'user defined scopes' ')' )
             header-breaking-flag :: !
@@ -434,9 +432,9 @@ class ConventionalCommitRunner(ConventionalCommit):
 def main():
     """Run the default program.
 
-    Creates a ConventionalCommitRunner, loads the configuration
-    options, gets,,cleans, and parses the commit, checks for
-    exceptions, and exits the program with a 0 for success, 1 for
+    Creates a ``ConventionalCommitRunner()``; loads the configuration
+    options; gets, cleans, and parses the commit; checks for
+    exceptions; and exits the program with a 0 for success, 1 for
     failure.
     """
     runner = ConventionalCommitRunner()
