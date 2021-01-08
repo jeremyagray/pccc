@@ -5,8 +5,13 @@
 
 [build-system]
 
+# Setuptools.
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+# Poetry.
+# requires = ["poetry_core>=1.0.0"]
+# build-backend = "poetry.core.masonry.api"
 
 [tool]
 
@@ -47,6 +52,7 @@ repair = false
 types = [
 "build",
 "ci",
+"depends",
 "docs",
 "feat",
 "fix",
@@ -73,13 +79,37 @@ required_footers = [
 [tool.poetry]
 
 authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
-description = "pccc:   the Python Conventional Commit Checker"
+description = "pccc:  the Python Conventional Commit Checker"
 name = "pccc"
 version = "0.3.2"
+license = "GPL-3.0-or-later"
+maintainers = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
+readme = "README.rst"
+homepage = "https://github.com/jeremyagray/pccc"
+repository = "https://github.com/jeremyagray/pccc"
+
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Programming Language :: Python :: 3.9",
+  "Topic :: Software Development :: Version Control :: Git",
+]
+
+packages = [
+  { include = "pccc" },
+]
+
+includes = [
+  "README.rst",
+  "LICENSE.rst",
+  "pccc.toml",
+  "docs/**/*",
+]
 
 [tool.poetry.dependencies]
 
 pyparsing = "^2.4"
+python = "^3.9"
 toml = "^0.10"
 
 [tool.poetry.dev-dependencies]
@@ -91,6 +121,10 @@ pytest = "^6.1"
 pytest-black = "^0.3"
 pytest-cov = "^2.10"
 pytest-flake8 = "^1.0"
+
+[tool.poetry.scripts]
+
+pccc = "pccc:main"
 
 [tool.pytest.ini_options]
 
