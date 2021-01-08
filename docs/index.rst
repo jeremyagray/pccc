@@ -2,13 +2,14 @@ pccc Documentation
 ==================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-.. automodule:: pccc
-   :members:
-   :imported-members:
-   :show-inheritance:
+   ../readme
+   ../classes
+   ../functions
+   ../license
+
 
 Indices and Tables
 ==================

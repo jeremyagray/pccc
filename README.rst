@@ -1,10 +1,10 @@
 pccc
-====
+----
 
 The Python Conventional Commit Checker.
 
 What is pccc?
-=============
+~~~~~~~~~~~~~
 
 pccc is a PyParsing based grammar and script for parsing and verifying
 a commit message is a conventional commit.  The default grammar
@@ -21,7 +21,8 @@ exceptions, it will return 0, otherwise 1.  This interface should be
 usable at the git ``commit-msg`` hook stage now.
 
 Roadmap
-=======
+~~~~~~~
+
 #. 100% test coverage, with tests implemented before merging. (target:
    0.4.0)
 #. Complete documentation integration and upload. (target: 0.4.0)
@@ -63,7 +64,7 @@ Roadmap
    0.9.0 or later)
 
 Installation
-============
+~~~~~~~~~~~~
 
 Install pccc with::
 
@@ -72,7 +73,7 @@ Install pccc with::
 or add as a poetry dev-dependency (TODO).
 
 Usage
-=====
+~~~~~
 
 Console::
 
@@ -93,13 +94,13 @@ In Python::
 See the source and documentation for more information.
 
 Configuration
-=============
+~~~~~~~~~~~~~
 
 See ``pccc.toml`` for an example ``[tool.pccc]`` section that may be
 copied into a ``pyproject.toml`` file.
 
 Copyright and License
-=====================
+~~~~~~~~~~~~~~~~~~~~~
 
 SPDX-License-Identifier: `GPL-3.0-or-later
 <https://spdx.org/licenses/GPL-3.0-or-later.html>`_
@@ -123,6 +124,6 @@ You should have received a copy of the `GNU General Public License
 If not, see https://www.gnu.org/licenses/.
 
 Author
-======
+~~~~~~
 
 `Jeremy A Gray <jeremy.a.gray@gmail.com>`_
