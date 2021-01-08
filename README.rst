@@ -25,9 +25,8 @@ Roadmap
 
 #. 100% test coverage, with tests implemented before merging. (target:
    0.4.0)
-#. Complete documentation integration and upload. (target: 0.4.0)
-#. Integrate ``argparse`` help into documentation. (target: 0.4.0)
-#. Insert license information into all source files. (target: 0.4.0)
+#. Complete documentation integration and upload at Read The
+   Docs. (target: 0.4.0)
 #. Complete upload and build for setuptools/pip and poetry. (target:
    0.4.0)
 #. Github issue template based off current ``tests/good/*.json``
@@ -64,6 +63,9 @@ Roadmap
 
 #. Implement custom hooks for handling per-project footers. (target:
    0.9.0 or later)
+
+#. Integrate ``argparse`` help into documentation. (done: 0.3.3)
+#. Insert license information into all source files. (done: 0.3.3)
 
 Installation
 ~~~~~~~~~~~~
