@@ -8,6 +8,7 @@ pccc Documentation
    ../readme
    ../classes
    ../functions
+   ../cli
    ../license
 
 
