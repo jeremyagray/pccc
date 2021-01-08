@@ -27,8 +27,6 @@ Roadmap
    0.4.0)
 #. Complete documentation integration and upload at Read The
    Docs. (target: 0.4.0)
-#. Complete upload and build for setuptools/pip and poetry. (target:
-   0.4.0)
 #. Github issue template based off current ``tests/good/*.json``
    files, with guidelines. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
@@ -66,6 +64,8 @@ Roadmap
 
 #. Integrate ``argparse`` help into documentation. (done: 0.3.3)
 #. Insert license information into all source files. (done: 0.3.3)
+#. Complete upload and build for setuptools/pip and poetry. (done:
+   0.3.3; poetry is configured but not used)
 
 Installation
 ~~~~~~~~~~~~
@@ -75,6 +75,10 @@ Install pccc with::
   pip install pccc
 
 or add as a poetry dev-dependency (TODO).
+
+To use as a git ``commit-msg`` hook, copy the script ``pccc`` to
+``.git/hooks/commit-msg`` and set the file as executable or integrate
+the script or module into your existing ``commit-msg`` hook.
 
 Usage
 ~~~~~
