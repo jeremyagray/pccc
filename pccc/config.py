@@ -364,7 +364,7 @@ def _create_argument_parser():
         "spell-check",
         "c",
         default=None,
-        help="Spell check the commit.  Default is false.",
+        help="Spell check the commit, or not.  Default is false.",
     )
     # parser.add_argument(
     #     "-s",
@@ -381,7 +381,8 @@ def _create_argument_parser():
         "rewrap",
         "w",
         default=None,
-        help="Rewrap the body commit, regardless of line length.  Default is false.",
+        help="Rewrap the body commit, or not, regardless of line length."
+        "  Default is false.",
     )
     # parser.add_argument(
     #     "-w",
@@ -399,7 +400,7 @@ def _create_argument_parser():
         "repair",
         "r",
         default=None,
-        help="Repair the body commit as necessary;"
+        help="Repair the body commit, or not;"
         " implies spell check and rewrap.  Default is false.",
     )
     # parser.add_argument(
