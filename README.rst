@@ -3,6 +3,10 @@ pccc
 
 The Python Conventional Commit Checker.
 
+.. image:: https://readthedocs.org/projects/pccc/badge/?version=latest
+   :target: https://pccc.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
+
 What is pccc?
 ~~~~~~~~~~~~~
 
@@ -25,8 +29,6 @@ Roadmap
 
 #. 100% test coverage, with tests implemented before merging. (target:
    0.4.0)
-#. Complete documentation integration and upload at Read The
-   Docs. (target: 0.4.0)
 #. Github issue template based off current ``tests/good/*.json``
    files, with guidelines. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
@@ -66,6 +68,8 @@ Roadmap
 #. Insert license information into all source files. (done: 0.3.3)
 #. Complete upload and build for setuptools/pip and poetry. (done:
    0.3.3; poetry is configured but not used)
+#. Complete documentation integration and upload at Read The
+   Docs. (done: 0.3.3)
 
 Installation
 ~~~~~~~~~~~~
@@ -99,7 +103,8 @@ In Python::
   >>> if ccr.exc == None:
   ...     print(ccr)
 
-See the source and documentation for more information.
+See the source and `documentation
+<https://pccc.readthedocs.io/en/latest/>`_ for more information.
 
 Configuration
 ~~~~~~~~~~~~~
