@@ -1,49 +1,28 @@
-// parsed commit testing object:
-// {
-//   "commit": string,
-//   "header": {
-//     "type": string,
-//     "scope": string,
-//     "description": string,
-//     "length": int
-//   },
-//   "body": {
-//     "paragraphs": [string],
-//     "longest": int
-//   },
-//   "breaking": {
-//     "flag": boolean,
-//     "token": string,
-//     "separator": string,
-//     "value": string
-//   },
-//   "footers": [object]
-// }
-//
-// footer:
-// {
-//   "token": "",
-//   "separator": "",
-//   "value": ""
-// }
-
-// {
-//   "commit": "",
-//   "header": {
-//     "type": "",
-//     "scope": "",
-//     "description": "",
-//     "length": 0
-//   },
-//   "body": {
-//     "paragraphs": [],
-//     "longest": 0
-//   },
-//   "breaking": {
-//     "flag": false,
-//     "token": "",
-//     "separator": "",
-//     "value": ""
-//   },
-//   "footers": []
-// }
+{
+  "raw": "",
+  "parsed": "",
+  "header": {
+    "type": "",
+    "scope": "",
+    "description": "",
+    "length": 0
+  },
+  "body": {
+    "paragraphs": [
+    ],
+    "longest": 0
+  },
+  "breaking": {
+    "flag": false,
+    "token": "",
+    "separator": "",
+    "value": ""
+  },
+  "footers": [
+    {
+      "token": "",
+      "separator": "",
+      "value": ""
+    }
+  ]
+}
