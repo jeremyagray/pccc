@@ -29,8 +29,6 @@ Roadmap
 
 #. 100% test coverage, with tests implemented before merging. (target:
    0.4.0)
-#. Github issue template based off current ``tests/good/*.json``
-   files, with guidelines. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
 
    * fail if over
@@ -70,6 +68,8 @@ Roadmap
    0.3.3; poetry is configured but not used)
 #. Complete documentation integration and upload at Read The
    Docs. (done: 0.3.3)
+#. Github issue template based off current ``tests/good/*.json``
+   files, with guidelines. (done: 0.3.3)
 
 Installation
 ~~~~~~~~~~~~
