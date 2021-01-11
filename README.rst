@@ -29,6 +29,8 @@ Roadmap
 
 #. 100% test coverage, with tests implemented before merging. (target:
    0.4.0)
+#. JSON configuration support, via ``pccc`` entry in
+   ``package.json``. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
 
    * fail if over
