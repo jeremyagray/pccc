@@ -126,6 +126,12 @@ pytest-flake8 = "^1.0"
 
 pccc = "pccc:main"
 
+[tool.poetry.urls]
+
+"Issues" = "https://github.com/jeremyagray/pccc/issues"
+"Documentation" = "https://pccc.readthedocs.io/"
+"Repository" = "https://github.com/jeremyagray/pccc"
+
 [tool.pytest.ini_options]
 
 flake8-max-line-length = 88
