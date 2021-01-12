@@ -79,12 +79,23 @@ Installation
 Install pccc with::
 
   pip install pccc
+  pip freeze > requirements.txt
 
-or add as a poetry dev-dependency (TODO).
+or add as a poetry dev-dependency.
+
+If you desire a package locally built with poetry, download the
+source, change the appropriate lines in ``pyproject.toml``, and
+rebuild.
 
 To use as a git ``commit-msg`` hook, copy the script ``pccc`` to
 ``.git/hooks/commit-msg`` and set the file as executable or integrate
-the script or module into your existing ``commit-msg`` hook.
+the script or module into your existing ``commit-msg`` hook.  ``pccc``
+relies on ``git`` setting the current working directory of the script
+to the root of the repository (where ``pyproject.toml`` or
+``package.json`` typically lives).  If this is not the repository
+default, pass the configuration file path as an argument or symlink
+from the current working directory to an appropriate configuration
+file.
 
 Usage
 ~~~~~
