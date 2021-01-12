@@ -29,8 +29,6 @@ Roadmap
 
 #. 100% test coverage, with tests implemented before merging. (target:
    0.4.0)
-#. JSON configuration support, via ``pccc`` entry in
-   ``package.json``. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
 
    * fail if over
@@ -72,6 +70,8 @@ Roadmap
    Docs. (done: 0.3.3)
 #. Github issue template based off current ``tests/good/*.json``
    files, with guidelines. (done: 0.3.3)
+#. JSON configuration support, via ``pccc`` entry in
+   ``package.json``. (done: 0.4.0)
 
 Installation
 ~~~~~~~~~~~~
@@ -112,7 +112,9 @@ Configuration
 ~~~~~~~~~~~~~
 
 See ``pccc.toml`` for an example ``[tool.pccc]`` section that may be
-copied into a ``pyproject.toml`` file.
+copied into a ``pyproject.toml`` file.  The same entries may be used
+in a ``pccc`` entry in ``package.json`` for JavaScript/TypeScript
+projects.
 
 Copyright and License
 ~~~~~~~~~~~~~~~~~~~~~

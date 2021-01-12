@@ -5,7 +5,9 @@
 """pccc configuration functions."""
 
 import argparse
+import json
 import os
+import re
 
 import toml
 
@@ -185,16 +187,25 @@ class Config:
 
         Unset values are explicitly ``None`` at each level.
 
-        Handles any ``FileNotFound`` or ``TomlDecodeError`` exceptions
-        that arise during loading of configuration file by ignoring
-        the file.
+        Handles any ``FileNotFound``, ``JSONDecodeError``, or
+        ``TomlDecodeError`` exceptions that arise during loading of
+        configuration file by ignoring the file.
         """
         try:
             self.update(**_load_file(self.config_file))
-        except (FileNotFoundError, toml.TomlDecodeError):
+        except (FileNotFoundError,):
             print(
-                f"Unable to load configuration file {self.config_file},"
+                f"Unable to find configuration file {self.config_file},"
                 " using defaults and CLI options."
+            )
+        except (
+            json.JSONDecodeError,
+            toml.TomlDecodeError,
+        ):
+            print(
+                f"Unable to parse configuration file {self.config_file},"
+                " using defaults and CLI options.\n"
+                "Ensure that file format matches extension."
             )
 
         return
@@ -208,9 +219,9 @@ class Config:
 
         Unset values are explicitly ``None`` at each level.
 
-        Handles any ``FileNotFound`` or ``TomlDecodeError`` exceptions
-        that arise during loading of configuration file by ignoring
-        the file.
+        Handles any ``FileNotFound``, ``JSONDecodeError``, or
+        ``TomlDecodeError`` exceptions that arise during loading of
+        configuration file by ignoring the file.
         """
         # Parse the CLI options to make configuration file path available.
         args = _create_argument_parser().parse_args()
@@ -223,10 +234,19 @@ class Config:
 
         try:
             self.update(**_load_file(self.config_file))
-        except (FileNotFoundError, toml.TomlDecodeError):
+        except (FileNotFoundError,):
             print(
-                f"Unable to load configuration file {self.config_file},"
+                f"Unable to find configuration file {self.config_file},"
                 " using defaults and CLI options."
+            )
+        except (
+            json.JSONDecodeError,
+            toml.TomlDecodeError,
+        ):
+            print(
+                f"Unable to parse configuration file {self.config_file},"
+                " using defaults and CLI options.\n"
+                "Ensure that file format matches extension."
             )
 
         self.update(**vars(args))
@@ -236,6 +256,141 @@ class Config:
 
 def _load_file(filename="./pyproject.toml"):
     """Load a configuration file, using the ``[tool.pccc]`` section.
+
+    Load a ``pyproject.toml`` configuration file, using the
+    ``[tool.pccc]`` section, or a ``package.json`` configuration file,
+    using the ``pccc`` entry.  Will only load ``package.json`` if
+    ``pyproject.toml`` is not available or if ``package.json`` is
+    explicitly set as the configuration file.
+
+    Parameters
+    ----------
+    filename : string (optional)
+        Configuration file to load.
+
+    Returns
+    -------
+    dict
+       Configuration option keys and values, with unset values
+       explicitly set to ``None``.
+
+    Raises
+    ------
+    JSONDecodeError
+        Raised if there are problems decoding a JSON configuration
+        file.
+    TomlDecodeError
+        Raised if there are problems decoding a TOML configuration
+        file.
+    FileNotFoundError
+        Raised if the configuration file does not exist or is not
+        readable.
+    """
+    options = {}
+    jsonRE = re.compile(r"^.*\.json$", re.IGNORECASE)
+
+    if os.path.abspath(filename) == os.path.abspath("./pyproject.toml"):
+        try:
+            # Default to ``./pyproject.toml``.
+            options = _load_toml_file(filename)
+        except toml.TomlDecodeError:
+            raise
+        except FileNotFoundError:
+            try:
+                # Then try ``./package.json``.
+                options = _load_json_file("./package.json")
+            except json.JSONDecodeError:
+                raise
+            except FileNotFoundError:
+                raise
+    elif jsonRE.match(filename):
+        try:
+            # Well, if JSON is supplied, use it.
+            options = _load_json_file(filename)
+        except json.JSONDecodeError:
+            raise
+        except FileNotFoundError:
+            raise
+    else:
+        try:
+            # Last chance, parse filename as TOML.
+            options = _load_toml_file(filename)
+        except toml.TomlDecodeError:
+            raise
+        except FileNotFoundError:
+            raise
+
+    return options
+
+
+def _load_json_file(filename="./package.json"):
+    """Load a JSON configuration file, using the ``pccc`` entry.
+
+    Load a ``package.json`` configuration file, returning the ``pccc``
+    entry.
+
+    Parameters
+    ----------
+    filename : string (optional)
+        Configuration file to load.
+
+    Returns
+    -------
+    dict
+       Configuration option keys and values, with unset values
+       explicitly set to ``None``.
+
+    Raises
+    ------
+    JSONDecodeError
+        Raised if there are problems decoding a JSON configuration
+        file.
+    FileNotFoundError
+        Raised if the configuration file does not exist or is not
+        readable.
+    """
+    try:
+        with open(filename, "r") as file:
+            config = json.load(file)
+    except json.JSONDecodeError as error:
+        lines = error.doc.split("\n")
+        print(
+            f"In configuration file {filename},"
+            f" line {error.lineno}, column {error.colno}:"
+        )
+        print(lines[error.lineno - 1])
+        print(error.msg)
+        raise
+    except FileNotFoundError as error:
+        print(f"{error.strerror}: {error.filename}")
+        print("trying package.json...")
+        raise
+
+    empty_options = {
+        "commit": None,
+        "config_file": None,
+        "header_length": None,
+        "body_length": None,
+        "spell_check": None,
+        "rewrap": None,
+        "repair": None,
+        "types": None,
+        "scopes": None,
+        "footers": None,
+        "required_footers": None,
+    }
+
+    for (k, v) in config["pccc"].items():
+        empty_options[k] = v
+
+    return empty_options
+
+
+def _load_toml_file(filename="./pyproject.toml"):
+    """Load a toml configuration file.
+
+    Load a ``pyproject.toml`` configuration file, returning the
+    ``[tool.pccc]`` section.
 
     Parameters
     ----------
@@ -251,7 +406,8 @@ def _load_file(filename="./pyproject.toml"):
     Raises
     ------
     TomlDecodeError
-        Raised if there are problems decoding the configuration file.
+        Raised if there are problems decoding a TOML configuration
+        file.
     FileNotFoundError
         Raised if the configuration file does not exist or is not
         readable.
@@ -270,6 +426,7 @@ def _load_file(filename="./pyproject.toml"):
         raise
     except FileNotFoundError as error:
         print(f"{error.strerror}: {error.filename}")
+        print("trying package.json...")
         raise
 
     empty_options = {
