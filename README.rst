@@ -71,7 +71,7 @@ Roadmap
 #. Github issue template based off current ``tests/good/*.json``
    files, with guidelines. (done: 0.3.3)
 #. JSON configuration support, via ``pccc`` entry in
-   ``package.json``. (done: 0.4.0)
+   ``package.json``. (done: 0.3.3)
 
 Installation
 ~~~~~~~~~~~~
