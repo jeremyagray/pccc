@@ -443,6 +443,7 @@ def main():
     """
     runner = ConventionalCommitRunner()
     runner.options.load()
+    runner.options.validate()
     runner.get()
     runner.clean()
     runner.parse()

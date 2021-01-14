@@ -179,6 +179,30 @@ class Config:
 
         return
 
+    def validate(self):
+        """Validate a configuration.
+
+        Validate the current configuration object to ensure compliance
+        with the conventional commit specification.  Current checks
+        include: ensure that 'fix' and 'feat' are present in the
+        ``types`` list.
+
+        Returns
+        -------
+        boolean
+            True for a valid configuration, raises on invalid
+            configuration.
+
+        Raises
+        ------
+        ValueError
+            Indicates a configuration value is incorrect.
+        """
+        if "fix" not in self.types or "feat" not in self.types:
+            raise ValueError("Commit types must include 'fix' and 'feat'.")
+
+        return True
+
     def load_file(self):
         """Load configuration file.
 
