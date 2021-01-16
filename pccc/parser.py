@@ -9,6 +9,7 @@ import fileinput
 
 # import pyenchant  # spell check
 import re
+import sys
 import textwrap
 
 import pyparsing as pp
@@ -435,7 +436,7 @@ class ConventionalCommitRunner(ConventionalCommit):
         return
 
 
-def main():
+def main(argv=None):
     """Run the default program.
 
     Creates a ``ConventionalCommitRunner()``; loads the configuration
@@ -444,13 +445,13 @@ def main():
     failure.
     """
     runner = ConventionalCommitRunner()
-    runner.options.load()
+    runner.options.load(argv)
     runner.options.validate()
     runner.get()
     runner.clean()
     runner.parse()
 
     if runner.exc:
-        exit(1)
+        sys.exit(1)
     else:
-        exit(0)
+        sys.exit(0)

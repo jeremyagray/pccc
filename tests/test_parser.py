@@ -72,9 +72,9 @@ def get_bad_commits():
                 with open(entry.path, "r") as file:
                     for line in file:
                         commit += line
-                commits.append(tuple([commit]))
+                commits.append(tuple([entry.path, commit]))
 
-    return commits
+    return tuple(commits)
 
 
 @pytest.mark.parametrize(
@@ -144,10 +144,10 @@ def test_good_commits(obj):
 
 
 @pytest.mark.parametrize(
-    "raw",
+    "fn, raw",
     get_bad_commits(),
 )
-def test_bad_commits(raw):
+def test_bad_commits(fn, raw):
     """Test bad commits."""
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load_file()
@@ -156,3 +156,51 @@ def test_bad_commits(raw):
     ccr.parse()
 
     assert isinstance(ccr.exc, pp.ParseException)
+
+
+@pytest.mark.parametrize(
+    "fn, commit",
+    create_raw_commit_files(),
+)
+def test_main_good_commits_file(fn, commit):
+    """Test pccc.main() with good commits from files."""
+    with pytest.raises(SystemExit) as error:
+        pccc.main([fn])
+        assert error.code == 0
+
+
+@pytest.mark.parametrize(
+    "fn, commit",
+    create_raw_commit_files(),
+)
+def test_main_good_commits_stdin(fn, commit, monkeypatch):
+    """Test pccc.main() with good commits from STDIN."""
+    monkeypatch.setattr("sys.stdin", io.StringIO(commit))
+
+    with pytest.raises(SystemExit) as error:
+        pccc.main()
+        assert error.code == 0
+
+
+@pytest.mark.parametrize(
+    "fn, raw",
+    get_bad_commits(),
+)
+def test_main_bad_commits_files(fn, raw, monkeypatch):
+    """Test pccc.main() with bad commits from files."""
+    with pytest.raises(SystemExit) as error:
+        pccc.main([fn])
+        assert error.code == 1
+
+
+@pytest.mark.parametrize(
+    "fn, raw",
+    get_bad_commits(),
+)
+def test_main_bad_commits_stdin(fn, raw, monkeypatch):
+    """Test pccc.main() with bad commits from STDIN."""
+    monkeypatch.setattr("sys.stdin", io.StringIO(raw))
+
+    with pytest.raises(SystemExit) as error:
+        pccc.main()
+        assert error.code == 1

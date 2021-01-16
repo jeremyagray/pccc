@@ -236,7 +236,7 @@ class Config:
 
         return
 
-    def load(self):
+    def load(self, argv=None):
         """Load configuration options.
 
         Load configuration options from defaults (class constructor),
@@ -250,7 +250,7 @@ class Config:
         configuration file by ignoring the file.
         """
         # Parse the CLI options to make configuration file path available.
-        args = _create_argument_parser().parse_args()
+        args = _create_argument_parser().parse_args(argv)
 
         # Configuration file; override defaults.
         self.config_file = _update_file_option(
