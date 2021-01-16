@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Parser unit tests."""
 
+import io
 import json
 import os
 import re
@@ -14,6 +15,30 @@ sys.path.insert(0, "/home/gray/src/work/pccc")
 import pccc  # noqa: E402
 
 CC = pccc.ConventionalCommit
+
+
+def create_raw_commit_files():
+    """Create raw commit files for testing commit loading."""
+    test_data = []
+    json_file_re = re.compile(r"\d{4}\.json$")
+
+    with os.scandir("./tests/good") as dir:
+        for entry in dir:
+            if entry.is_file() and json_file_re.match(entry.name):
+                with open(entry.path, "r") as file:
+                    try:
+                        data = json.load(file)
+                    except json.JSONDecodeError as error:
+                        print(f"JSON error in file {file}")
+                        raise error
+
+                raw_fn = re.sub(r"json$", "raw", entry.path)
+                with open(raw_fn, "w") as file:
+                    file.write(data["raw"])
+
+                test_data.append(tuple([raw_fn, data["raw"]]))
+
+    return tuple(test_data)
 
 
 def get_good_commits():
@@ -50,6 +75,51 @@ def get_bad_commits():
                 commits.append(tuple([commit]))
 
     return commits
+
+
+@pytest.mark.parametrize(
+    "fn, commit",
+    create_raw_commit_files(),
+)
+def test_load_commits_file(fn, commit):
+    """Test loading commits from files."""
+    ccr = pccc.ConventionalCommitRunner()
+    ccr.options.load_file()
+    ccr.options.validate()
+
+    ccr.options.commit = fn
+    ccr.get()
+
+    assert ccr.raw == commit
+
+
+@pytest.mark.parametrize(
+    "fn, commit",
+    create_raw_commit_files(),
+)
+def test_load_commits_stdin(fn, commit, monkeypatch):
+    """Test loading commits from STDIN."""
+    ccr = pccc.ConventionalCommitRunner()
+    monkeypatch.setattr("sys.stdin", io.StringIO(commit))
+    ccr.options.load_file()
+    ccr.options.validate()
+
+    ccr.options.commit = fn
+    ccr.get()
+
+    assert ccr.raw == commit
+
+
+def test_load_nonexistent_commit_file():
+    """Test loading a non-existent commit file."""
+    ccr = pccc.ConventionalCommitRunner()
+    ccr.options.load_file()
+    ccr.options.validate()
+
+    ccr.options.commit = "./tests/bad/nothere.json"
+
+    with pytest.raises(FileNotFoundError):
+        ccr.get()
 
 
 @pytest.mark.parametrize(

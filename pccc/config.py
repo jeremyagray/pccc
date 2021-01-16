@@ -99,39 +99,46 @@ class Config:
             rs += "spell_check = true\n"
         else:
             rs += "spell_check = false\n"
+
         if self.rewrap:
             rs += "rewrap = true\n"
         else:
             rs += "rewrap = false\n"
+
         if self.repair:
             rs += "repair = true\n"
         else:
             rs += "repair = false\n"
-            rs += "\n"
-            rs += "types = [\n" + "\n".join(
-                map(lambda item: f'  "{item}",', self.types)
-            )
+
+        rs += "\n"
+
+        rs += "types = [\n" + "\n".join(map(lambda item: f'  "{item}",', self.types))
+
         if len(self.types):
             rs += "\n]\n\n"
         else:
             rs += "]\n\n"
-            rs += "scopes = [\n" + "\n".join(
-                map(lambda item: f'  "{item}",', self.scopes)
-            )
+
+        rs += "scopes = [\n" + "\n".join(map(lambda item: f'  "{item}",', self.scopes))
+
         if len(self.scopes):
             rs += "\n]\n\n"
         else:
             rs += "]\n\n"
-            rs += "footers = [\n" + "\n".join(
-                map(lambda item: f'  "{item}",', self.footers)
-            )
+
+        rs += "footers = [\n" + "\n".join(
+            map(lambda item: f'  "{item}",', self.footers)
+        )
+
         if len(self.footers):
             rs += "\n]\n\n"
         else:
             rs += "]\n\n"
-            rs += "required_footers = [\n" + "\n".join(
-                map(lambda item: f'  "{item}",', self.required_footers)
-            )
+
+        rs += "required_footers = [\n" + "\n".join(
+            map(lambda item: f'  "{item}",', self.required_footers)
+        )
+
         if len(self.required_footers):
             rs += "\n]"
         else:
@@ -158,20 +165,15 @@ class Config:
     def update(self, *args, **kwargs):
         """Update a configuration.
 
-        Return a new configuration object from the attributes of self
-        combined with the key/value pairs provided, ignoring any keys
-        that are not attributes and values that are ``None``.  The
-        provided key/value pairs override the original values in self.
+        Update the current configuration object from the provided
+        dictionary, ignoring any keys that are not attributes and
+        values that are ``None``.  The provided key/value pairs
+        override the original values in self.
 
         Parameters
         ----------
         kwargs : dict
            Key/value pairs of configuration options.
-
-        Returns
-        -------
-        object
-            A new ``Config()`` object.
         """
         for (k, v) in kwargs.items():
             if hasattr(self, k) and v is not None:

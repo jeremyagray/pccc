@@ -62,8 +62,6 @@ class ConventionalCommit:
     footers : [dict]
         An array of footer dicts, which are identical to the breaking
         dicts, without a "flag" field.
-    options : object
-        A Config() object containing current configuration options.
     exc : object
         ParseException raised during parsing, or ``None``.
     """
@@ -232,11 +230,15 @@ class ConventionalCommitRunner(ConventionalCommit):
         configuration, defaulting to ``STDIN``.
         """
         commit = ""
-        with fileinput.FileInput(files=(self.options.commit), mode="r") as input:
-            for line in input:
-                commit += line
+        try:
+            with fileinput.FileInput(files=(self.options.commit), mode="r") as input:
+                for line in input:
+                    commit += line
 
-        self.raw = commit
+            self.raw = commit
+        except FileNotFoundError as error:
+            print(f"{error.strerror}: {error.filename}")
+            raise
 
     def wrap(self):
         """Wrap a commit body to a given length."""
