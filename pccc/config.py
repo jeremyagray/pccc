@@ -205,37 +205,6 @@ class Config:
 
         return True
 
-    def load_file(self):
-        """Load configuration file.
-
-        Load configuration options from file, with later values
-        overriding previous values.
-
-        Unset values are explicitly ``None`` at each level.
-
-        Handles any ``FileNotFound``, ``JSONDecodeError``, or
-        ``TomlDecodeError`` exceptions that arise during loading of
-        configuration file by ignoring the file.
-        """
-        try:
-            self.update(**_load_file(self.config_file))
-        except (FileNotFoundError,):
-            print(
-                f"Unable to find configuration file {self.config_file},"
-                " using defaults and CLI options."
-            )
-        except (
-            json.JSONDecodeError,
-            toml.TomlDecodeError,
-        ):
-            print(
-                f"Unable to parse configuration file {self.config_file},"
-                " using defaults and CLI options.\n"
-                "Ensure that file format matches extension."
-            )
-
-        return
-
     def load(self, argv=None):
         """Load configuration options.
 
