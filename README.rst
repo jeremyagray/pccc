@@ -30,7 +30,6 @@ usable at the git ``commit-msg`` hook stage now.
 Roadmap
 ~~~~~~~
 
-#. Add and configure tox. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
 
    * fail if over
@@ -75,7 +74,8 @@ Roadmap
 #. JSON configuration support, via ``pccc`` entry in
    ``package.json``. (done: 0.3.3)
 #. 100% test coverage, with tests implemented before merging. (done:
-   0.4.0)
+   0.3.4)
+#. Add and configure tox. (done: 0.4.0)
 
 Installation
 ~~~~~~~~~~~~

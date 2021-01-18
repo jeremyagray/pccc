@@ -32,7 +32,6 @@ nodeenv==1.5.0
 packaging==20.8
 pathspec==0.8.1
 pep517==0.9.1
-pkg-resources==0.0.0
 pkginfo==1.6.1
 pluggy==0.13.1
 pre-commit==2.9.3

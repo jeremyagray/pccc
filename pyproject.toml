@@ -81,7 +81,7 @@ required_footers = [
 authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
 description = "pccc:  the Python Conventional Commit Checker"
 name = "pccc"
-version = "0.3.4"
+version = "0.4.0"
 license = "GPL-3.0-or-later"
 maintainers = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
 readme = "README.rst"
@@ -91,6 +91,8 @@ repository = "https://github.com/jeremyagray/pccc"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Topic :: Software Development :: Version Control :: Git",
 ]
@@ -122,6 +124,7 @@ pytest = "^6.1"
 pytest-black = "^0.3"
 pytest-cov = "^2.10"
 pytest-flake8 = "^1.0"
+pytest-pydocstyle = "^2.2"
 
 [tool.poetry.scripts]
 
@@ -135,6 +138,7 @@ pccc = "pccc:main"
 
 [tool.pytest.ini_options]
 
+flake8-max-complexity = 20
 flake8-max-line-length = 88
 
 flake8-ignore = [
