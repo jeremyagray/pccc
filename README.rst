@@ -3,6 +3,9 @@ pccc
 
 The Python Conventional Commit Checker.
 
+.. image:: https://badge.fury.io/py/pccc.svg
+   :target: https://badge.fury.io/py/pccc
+   :alt: PyPI Version
 .. image:: https://readthedocs.org/projects/pccc/badge/?version=latest
    :target: https://pccc.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
@@ -27,8 +30,7 @@ usable at the git ``commit-msg`` hook stage now.
 Roadmap
 ~~~~~~~
 
-#. 100% test coverage, with tests implemented before merging. (target:
-   0.4.0)
+#. Add and configure tox. (target: 0.4.0)
 #. Finish body wrapping. (target: 0.5.0)
 
    * fail if over
@@ -72,6 +74,8 @@ Roadmap
    files, with guidelines. (done: 0.3.3)
 #. JSON configuration support, via ``pccc`` entry in
    ``package.json``. (done: 0.3.3)
+#. 100% test coverage, with tests implemented before merging. (done:
+   0.4.0)
 
 Installation
 ~~~~~~~~~~~~
