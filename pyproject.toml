@@ -81,7 +81,7 @@ required_footers = [
 authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
 description = "pccc:  the Python Conventional Commit Checker"
 name = "pccc"
-version = "0.4.0"
+version = "0.4.1"
 license = "GPL-3.0-or-later"
 maintainers = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
 readme = "README.rst"
@@ -92,6 +92,8 @@ classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
   "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3.6",
+  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Topic :: Software Development :: Version Control :: Git",
