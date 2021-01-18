@@ -1,0 +1,60 @@
+{
+  "valid": true,
+  "pyproject": "[tool.pccc]\n\nheader_length = 50\nbody_length = 72\nrewrap = true\nspell_check = true\nrepair = false\n\ntypes = [\n  \"build\",\n  \"docs\",\n  \"feat\",\n  \"fix\",\n  \"refactor\",\n  \"test\"\n]\n\nscopes = [\n  \"config\",\n  \"parser\"\n]\n\nfooters = [\n  \"signed-off-by\"\n]\n\nrequired_footers = [\n  \"signed-off-by\"\n]\n",
+  "pccc": {
+    "header_length": 50,
+    "body_length": 72,
+    "rewrap": true,
+    "spell_check": true,
+    "repair": false,
+    "types": [
+      "build",
+      "docs",
+      "feat",
+      "fix",
+      "refactor",
+      "test"
+    ],
+    "scopes": [
+      "config",
+      "parser"
+    ],
+    "footers": [
+      "signed-off-by"
+    ],
+    "required_footers": [
+      "signed-off-by"
+    ]
+  },
+  "cli": [
+  ],
+  "config": {
+    "commit": "-",
+    "config_file": "./pyproject.toml",
+    "header_length": 50,
+    "body_length": 72,
+    "rewrap": true,
+    "spell_check": true,
+    "repair": false,
+    "types": [
+      "build",
+      "docs",
+      "feat",
+      "fix",
+      "refactor",
+      "test"
+    ],
+    "scopes": [
+      "config",
+      "parser"
+    ],
+    "footers": [
+      "signed-off-by"
+    ],
+    "required_footers": [
+      "signed-off-by"
+    ]
+  },
+  "str": "[tool.pccc]\n\nheader_length = 50\nbody_length = 72\nrepair = false\nrewrap = true\nspell_check = true\n\ntypes = [\n  \"build\",\n  \"docs\",\n  \"feat\",\n  \"fix\",\n  \"refactor\",\n  \"test\"\n]\n\nscopes = [\n  \"config\",\n  \"parser\"\n]\n\nfooters = [\n  \"signed-off-by\"\n]\n\nrequired_footers = [\n  \"signed-off-by\"\n]\n",
+  "repr": "Config(commit=\"-\", config_file=\"./pyproject.toml\", header_length=50, body_length=72, repair=False, rewrap=True, spell_check=True, types=['build', 'docs', 'feat', 'fix', 'refactor', 'test'], scopes=['config', 'parser'], footers=['signed-off-by'], required_footers=['signed-off-by'])"
+}

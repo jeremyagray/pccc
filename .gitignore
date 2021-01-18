@@ -15,4 +15,5 @@ docs/_build
 htmlcov
 
 # Generated files.
-*.raw
+tests/good/*.raw
+tests/config/*.toml
