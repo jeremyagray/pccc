@@ -28,12 +28,12 @@ class Config:
        Maximum header length; default is 50.
     body_length : int
        Maximum body line length; default is 72.
-    spell_check : boolean
-      Spell check header and body; default is ``False``.
-    rewrap : boolean
-      Rewrap body; default is ``False``.
     repair : boolean
       Repair commit, implying spell check and rewrap; default is ``False``.
+    rewrap : boolean
+      Rewrap body; default is ``False``.
+    spell_check : boolean
+      Spell check header and body; default is ``False``.
     types : [string]
         List of header types; default is ``['feat', 'fix']``.
     scopes : [string]
@@ -50,9 +50,9 @@ class Config:
         config_file="./pyproject.toml",
         header_length=50,
         body_length=72,
-        spell_check=False,
-        rewrap=False,
         repair=False,
+        rewrap=False,
+        spell_check=False,
         types=["feat", "fix"],
         scopes=[],
         footers=[],
@@ -71,9 +71,9 @@ class Config:
         self.config_file = config_file
         self.header_length = header_length
         self.body_length = body_length
-        self.spell_check = spell_check
-        self.rewrap = rewrap
         self.repair = repair
+        self.rewrap = rewrap
+        self.spell_check = spell_check
         self.types = types
         self.scopes = scopes
         self.footers = footers
@@ -95,39 +95,44 @@ class Config:
         rs += "\n"
         rs += f"header_length = {self.header_length}\n"
         rs += f"body_length = {self.body_length}\n"
-        if self.spell_check:
-            rs += "spell_check = true\n"
-        else:
-            rs += "spell_check = false\n"
-
-        if self.rewrap:
-            rs += "rewrap = true\n"
-        else:
-            rs += "rewrap = false\n"
 
         if self.repair:
             rs += "repair = true\n"
         else:
             rs += "repair = false\n"
 
+        if self.rewrap:
+            rs += "rewrap = true\n"
+        else:
+            rs += "rewrap = false\n"
+
+        if self.spell_check:
+            rs += "spell_check = true\n"
+        else:
+            rs += "spell_check = false\n"
+
         rs += "\n"
 
-        rs += "types = [\n" + "\n".join(map(lambda item: f'  "{item}",', self.types))
+        # rs += "types = [\n" + "\n".join(map(lambda item: f'  "{item}",', self.types))
+        rs += "types = [\n" + ",\n".join(map(lambda item: f'  "{item}"', self.types))
 
         if len(self.types):
             rs += "\n]\n\n"
         else:
             rs += "]\n\n"
 
-        rs += "scopes = [\n" + "\n".join(map(lambda item: f'  "{item}",', self.scopes))
+        rs += "scopes = [\n" + ",\n".join(map(lambda item: f'  "{item}"', self.scopes))
 
         if len(self.scopes):
             rs += "\n]\n\n"
         else:
             rs += "]\n\n"
 
-        rs += "footers = [\n" + "\n".join(
-            map(lambda item: f'  "{item}",', self.footers)
+        # rs += "footers = [\n" + "\n".join(
+        #     map(lambda item: f'  "{item}",', self.footers)
+        # )
+        rs += "footers = [\n" + ",\n".join(
+            map(lambda item: f'  "{item}"', self.footers)
         )
 
         if len(self.footers):
@@ -135,14 +140,17 @@ class Config:
         else:
             rs += "]\n\n"
 
-        rs += "required_footers = [\n" + "\n".join(
-            map(lambda item: f'  "{item}",', self.required_footers)
+        # rs += "required_footers = [\n" + "\n".join(
+        #     map(lambda item: f'  "{item}",', self.required_footers)
+        # )
+        rs += "required_footers = [\n" + ",\n".join(
+            map(lambda item: f'  "{item}"', self.required_footers)
         )
 
         if len(self.required_footers):
-            rs += "\n]"
+            rs += "\n]\n"
         else:
-            rs += "]"
+            rs += "]\n"
 
         return rs
 
@@ -153,9 +161,9 @@ class Config:
             f'config_file="{self.config_file}", '
             f"header_length={self.header_length}, "
             f"body_length={self.body_length}, "
-            f"spell_check={self.spell_check}, "
-            f"rewrap={self.rewrap}, "
             f"repair={self.repair}, "
+            f"rewrap={self.rewrap}, "
+            f"spell_check={self.spell_check}, "
             f"types={self.types}, "
             f"scopes={self.scopes}, "
             f"footers={self.footers}, "
@@ -200,7 +208,7 @@ class Config:
         ValueError
             Indicates a configuration value is incorrect.
         """
-        if "fix" not in self.types or "feat" not in self.types:
+        if not ("fix" in self.types and "feat" in self.types):
             raise ValueError("Commit types must include 'fix' and 'feat'.")
 
         return True
@@ -222,10 +230,8 @@ class Config:
         args = _create_argument_parser().parse_args(argv)
 
         # Configuration file; override defaults.
-        self.config_file = _update_file_option(
-            self.config_file,
-            args.config_file,
-        )
+        if args.config_file is not None:
+            self.config_file = args.config_file
 
         try:
             self.update(**_load_file(self.config_file))
@@ -234,14 +240,17 @@ class Config:
                 f"Unable to find configuration file {self.config_file},"
                 " using defaults and CLI options."
             )
-        except (
-            json.JSONDecodeError,
-            toml.TomlDecodeError,
-        ):
+        except (json.JSONDecodeError,):
             print(
-                f"Unable to parse configuration file {self.config_file},"
-                " using defaults and CLI options.\n"
+                f"Unable to parse configuration file {self.config_file}"
+                " (default package.json), using defaults and CLI options.\n"
                 "Ensure that file format matches extension."
+            )
+        except (toml.TomlDecodeError,):
+            print(
+                f"Unable to parse configuration file {self.config_file}"
+                " (default pyproject.toml), using defaults and CLI options."
+                "  Ensure that file format matches extension."
             )
 
         self.update(**vars(args))
@@ -358,7 +367,6 @@ def _load_json_file(filename="./package.json"):
         raise
     except FileNotFoundError as error:
         print(f"{error.strerror}: {error.filename}")
-        print("trying package.json...")
         raise
 
     empty_options = {
@@ -444,40 +452,10 @@ def _load_toml_file(filename="./pyproject.toml"):
     return empty_options
 
 
-def _update_file_option(orig, new):
-    """Update a file option.
-
-    Update date a file option, if file new exists and is readable.
-    """
-    if new and os.path.exists(new):
-        return new
-    else:
-        return orig
-
-
-def _add_bool_arg(parser, name, short, default=None, help=""):
-    parser.add_argument(
-        "--" + name,
-        "-" + short,
-        dest=name,
-        action="store_true",
-        help=help,
-    )
-    parser.add_argument(
-        "--no-" + name,
-        "-" + short.upper(),
-        dest=name,
-        action="store_false",
-        help=help,
-    )
-    parser.set_defaults(**{name: default})
-
-    return
-
-
 def _create_argument_parser():
     """Create an argparse argument parser."""
     parser = argparse.ArgumentParser()
+
     parser.add_argument(
         dest="commit",
         type=str,
@@ -485,6 +463,7 @@ def _create_argument_parser():
         nargs="?",
         help="Commit message file.",
     )
+
     parser.add_argument(
         "-o",
         "--config-file",
@@ -493,6 +472,7 @@ def _create_argument_parser():
         default="./pyproject.toml",
         help="Path to configuration file.  Default is ./pyproject.toml.",
     )
+
     parser.add_argument(
         "-l",
         "--header-length",
@@ -502,6 +482,7 @@ def _create_argument_parser():
         default=None,
         help="Maximum length of commit header.  Default is 50.",
     )
+
     parser.add_argument(
         "-b",
         "--body-length",
@@ -511,96 +492,112 @@ def _create_argument_parser():
         default=None,
         help="Maximum length of a body line.  Default is 72.",
     )
-    _add_bool_arg(
-        parser,
-        "spell-check",
-        "c",
+
+    spell_group = parser.add_mutually_exclusive_group()
+    spell_group.add_argument(
+        "-c",
+        "--spell-check",
+        dest="spell_check",
         default=None,
-        help="Spell check the commit, or not.  Default is false.",
+        action="store_true",
+        help="Spell check the commit.  Default is no spell checking.",
     )
-    # parser.add_argument(
-    #     "-s",
-    #     "--spell-check",
-    #     dest="spell_check",
-    #     # type=bool,
-    #     # default=False,
-    #     default=None,
-    #     action="store_true",
-    #     help="Spell check the commit.  Default is false.",
-    # )
-    _add_bool_arg(
-        parser,
-        "rewrap",
-        "w",
+    spell_group.add_argument(
+        "-C",
+        "--no-spell-check",
+        dest="spell_check",
+        # type=bool,
+        # default=False,
         default=None,
-        help="Rewrap the body commit, or not, regardless of line length."
+        action="store_false",
+        help="Do not spell check the commit.  Default is no spell checking.",
+    )
+
+    rewrap_group = parser.add_mutually_exclusive_group()
+    rewrap_group.add_argument(
+        "-w",
+        "--rewrap",
+        dest="rewrap",
+        default=None,
+        action="store_true",
+        help="Rewrap the body commit, regardless of line length."
+        "  Default is no rewrapping.",
+    )
+    rewrap_group.add_argument(
+        "-W",
+        "--no-rewrap",
+        dest="rewrap",
+        default=None,
+        action="store_false",
+        help="Do not rewrap the body commit, regardless of line length."
+        "  Default is no rewrapping.",
+    )
+
+    repair_group = parser.add_mutually_exclusive_group()
+    repair_group.add_argument(
+        "-r",
+        "--repair",
+        dest="repair",
+        default=None,
+        action="store_true",
+        help="Repair the body commit as necessary; implies spell check and rewrap."
         "  Default is false.",
     )
-    # parser.add_argument(
-    #     "-w",
-    #     "--rewrap",
-    #     dest="rewrap",
-    #     type=bool,
-    #     # default=False,
-    #     default=None,
-    #     action="store_true",
-    #     help="Rewrap the body commit, regardless of line length."
-    #     "  Default is false.",
-    # )
-    _add_bool_arg(
-        parser,
-        "repair",
-        "r",
+    repair_group.add_argument(
+        "-R",
+        "--no-repair",
+        dest="repair",
         default=None,
-        help="Repair the body commit, or not;"
-        " implies spell check and rewrap.  Default is false.",
+        action="store_false",
+        help="Do not repair the body commit; implies no spell check and no"
+        " rewrap.  Default is false.",
     )
-    # parser.add_argument(
-    #     "-r",
-    #     "--repair",
-    #     dest="repair",
-    #     type=bool,
-    #     # default=False,
-    #     default=None,
-    #     action="store_true",
-    #     help="Repair the body commit as necessary; implies spell check and rewrap."
-    #     "  Default is false.",
-    # )
+
     parser.add_argument(
         "-t",
         "--types",
         dest="types",
         default=None,
-        type=lambda s: [item.strip() for item in s.split(",")],
+        type=_field_list_handler,
         help="List (comma delimited) of allowable types for the type field"
         " of header.  Default is `['fix', 'feat']`.",
     )
+
     parser.add_argument(
         "-s",
         "--scopes",
         dest="scopes",
         default=None,
-        type=lambda s: [item.strip() for item in s.split(",")],
+        type=_field_list_handler,
         help="List (comma delimited) of allowable scopes for the scope field"
         " of header.  Default is an empty list.",
     )
+
     parser.add_argument(
         "-f",
         "--footers",
         dest="footers",
         default=None,
-        type=lambda s: [item.strip() for item in s.split(",")],
+        type=_field_list_handler,
         help="List (comma delimited) of allowable footer tokens for the"
         " commit footers.  Default is an empty list.",
     )
+
     parser.add_argument(
         "-g",
         "--required-footers",
         dest="required_footers",
         default=None,
-        type=lambda s: [item.strip() for item in s.split(",")],
+        type=_field_list_handler,
         help="List (comma delimited) of required footer tokens for the"
         " commit footers.  Default is an empty list.",
     )
 
     return parser
+
+
+def _field_list_handler(s):
+    if len(s) == 0:
+        return []
+    else:
+        return [item.strip() for item in s.split(",")]

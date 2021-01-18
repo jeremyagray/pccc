@@ -84,7 +84,7 @@ def get_bad_commits():
 def test_load_commits_file(fn, commit):
     """Test loading commits from files."""
     ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load_file()
+    ccr.options.load("")
     ccr.options.validate()
 
     ccr.options.commit = fn
@@ -101,7 +101,7 @@ def test_load_commits_stdin(fn, commit, monkeypatch):
     """Test loading commits from STDIN."""
     ccr = pccc.ConventionalCommitRunner()
     monkeypatch.setattr("sys.stdin", io.StringIO(commit))
-    ccr.options.load_file()
+    ccr.options.load("")
     ccr.options.validate()
 
     ccr.options.commit = fn
@@ -113,7 +113,7 @@ def test_load_commits_stdin(fn, commit, monkeypatch):
 def test_load_nonexistent_commit_file():
     """Test loading a non-existent commit file."""
     ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load_file()
+    ccr.options.load("")
     ccr.options.validate()
 
     ccr.options.commit = "./tests/bad/nothere.json"
@@ -129,7 +129,7 @@ def test_load_nonexistent_commit_file():
 def test_good_commits(obj):
     """Test good commits."""
     ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load_file()
+    ccr.options.load("")
     ccr.raw = obj[0]["raw"]
     ccr.clean()
     ccr.parse()
@@ -150,7 +150,7 @@ def test_good_commits(obj):
 def test_bad_commits(fn, raw):
     """Test bad commits."""
     ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load_file()
+    ccr.options.load("")
     ccr.raw = raw[0]
     ccr.clean()
     ccr.parse()
