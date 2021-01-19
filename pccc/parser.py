@@ -467,11 +467,7 @@ class ConventionalCommitRunner(ConventionalCommit):
             header + pp.Optional(body) + pp.Optional(breaking) + pp.ZeroOrMore(footer)
         ).setResultsName("commit-msg", listAllMatches=True)
 
-        try:
-            commit_msg.parseString(self.cleaned)
-        except pp.ParseException as exc:
-            self.exc = exc
-            print(exc)
+        commit_msg.parseString(self.cleaned)
 
         return
 
@@ -489,9 +485,15 @@ def main(argv=None):
     runner.options.validate()
     runner.get()
     runner.clean()
-    runner.parse()
 
-    if runner.exc:
-        sys.exit(1)
-    else:
+    try:
+        runner.parse()
+        runner.check_header_length()
+        runner.check_body_length()
         sys.exit(0)
+    except ValueError as error:
+        print(error)
+        sys.exit(1)
+    except pp.ParseException as error:
+        print(f"parse error at {error.lineno}:{error.col}: {error.line}")
+        sys.exit(1)
