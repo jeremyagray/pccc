@@ -37,6 +37,9 @@ Roadmap
    * do nothing if fine
    * rewrap if fine
 
+#. General exception handling plan for commit files, configuration
+   files, configuration validation, parsing exceptions, and commit
+   validation. (target: 0.5.0)
 #. Implement spell checking. (target: 0.6.0)
 
    * will not autocorrect
