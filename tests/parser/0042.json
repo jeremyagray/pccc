@@ -1,0 +1,24 @@
+{
+  "raw": "fix?(parser): fix parser bug\n",
+  "cleaned": "fix?(parser): fix parser bug\n",
+  "parsed": "fix?(parser): fix parser bug\n",
+  "header": {
+    "type": "fix",
+    "scope": "parser",
+    "description": "fix parser bug",
+    "length": 28
+  },
+  "body": {
+    "paragraphs": [],
+    "longest": 0
+  },
+  "breaking": {
+    "flag": false,
+    "token": "",
+    "separator": ": ",
+    "value": ""
+  },
+  "footers": [],
+  "parseable": false,
+  "errors": []
+}

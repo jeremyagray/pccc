@@ -1,0 +1,24 @@
+{
+  "raw": "redo: fix parser bug\n",
+  "cleaned": "redo: fix parser bug\n",
+  "parsed": "redo: fix parser bug\n",
+  "header": {
+    "type": "redo",
+    "scope": "",
+    "description": "fix parser bug",
+    "length": 20
+  },
+  "body": {
+    "paragraphs": [],
+    "longest": 0
+  },
+  "breaking": {
+    "flag": false,
+    "token": "",
+    "separator": ": ",
+    "value": ""
+  },
+  "footers": [],
+  "parseable": false,
+  "errors": []
+}
