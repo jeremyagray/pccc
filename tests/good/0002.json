@@ -19,5 +19,6 @@
   },
   "footers": [],
   "cleaned": "fix: fix parser bug\n",
-  "valid": true
+  "parseable": true,
+  "errors": []
 }
