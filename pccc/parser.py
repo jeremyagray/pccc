@@ -241,6 +241,46 @@ class ConventionalCommitRunner(ConventionalCommit):
             print(f"{error.strerror}: {error.filename}")
             raise
 
+    def check_header_length(self):
+        """Check that header length is correct.
+
+        Check that header length is less than or equal to
+        ``self.options.header_length``.
+
+        Raises
+        ------
+        ValueError
+            Indicates the commit message header exceeds its configured
+            length.
+        """
+        if self.header["length"] > self.options.header_length:
+            raise ValueError(
+                f"Commit header length ({self.header['length']}) exceeds"
+                f" the maximum length ({self.options.header_length})."
+            )
+
+        return True
+
+    def check_body_length(self):
+        """Check that maximum body length is correct.
+
+        Check that the maximum body line length is less than or equal
+        to ``self.options.body_length``.
+
+        Raises
+        ------
+        ValueError
+            Indicates the commit message body has a line that exceeds
+            its configured maximum length.
+        """
+        if self.body["longest"] > self.options.body_length:
+            raise ValueError(
+                f"Commit header length ({self.body['longest']}) exceeds"
+                f" the maximum length ({self.options.body_length})."
+            )
+
+        return True
+
     def wrap(self):
         """Wrap a commit body to a given length."""
         self.body["paragraphs"] = list(
