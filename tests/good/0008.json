@@ -17,5 +17,7 @@
     "separator": ": ",
     "value": "This breaks the old grammar."
   },
-  "footers": []
+  "footers": [],
+  "cleaned": "fix!: fix parser bug\n\nBREAKING CHANGE: This breaks the old grammar.\n",
+  "valid": true
 }
