@@ -1,0 +1,26 @@
+{
+  "raw": "fix: find parser bug by checking for overly long headers\n\nBREAKING CHANGE: This breaks the old grammar.\n",
+  "cleaned": "fix: find parser bug by checking for overly long headers\n\nBREAKING CHANGE: This breaks the old grammar.\n",
+  "parsed": "fix: find parser bug by checking for overly long headers\n\nBREAKING CHANGE: This breaks the old grammar.\n",
+  "header": {
+    "type": "fix",
+    "scope": "",
+    "description": "find parser bug by checking for overly long headers",
+    "length": 56
+  },
+  "body": {
+    "paragraphs": [],
+    "longest": 0
+  },
+  "breaking": {
+    "flag": false,
+    "token": "BREAKING CHANGE",
+    "separator": ": ",
+    "value": "This breaks the old grammar."
+  },
+  "footers": [],
+  "parseable": true,
+  "errors": [
+    "header_length"
+  ]
+}
