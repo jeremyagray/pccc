@@ -14,100 +14,115 @@ sys.path.insert(0, "/home/gray/src/work/pccc")
 
 import pccc  # noqa: E402
 
-CC = pccc.ConventionalCommit
 
-
-def create_raw_commit_files():
-    """Create raw commit files for testing commit loading."""
-    test_data = []
+def get_commits():
+    """Load commit data for tests."""
+    data = []
     json_file_re = re.compile(r"\d{4}\.json$")
 
-    with os.scandir("./tests/good") as dir:
+    with os.scandir("./tests/parser") as dir:
         for entry in dir:
             if entry.is_file() and json_file_re.match(entry.name):
+                datum = []
                 with open(entry.path, "r") as file:
                     try:
-                        data = json.load(file)
-                    except json.JSONDecodeError as error:
-                        print(f"JSON error in file {file}")
-                        raise error
-
-                raw_fn = re.sub(r"json$", "raw", entry.path)
-                with open(raw_fn, "w") as file:
-                    file.write(data["raw"])
-
-                test_data.append(tuple([raw_fn, data["raw"]]))
-
-    return tuple(test_data)
-
-
-def get_good_commits():
-    """Load good commit data for tests."""
-    commits = []
-    json_file_re = re.compile(r"\d{4}\.json$")
-
-    with os.scandir("./tests/good") as it:
-        for entry in it:
-            if entry.is_file() and json_file_re.match(entry.name):
-                commit = []
-                with open(entry.path, "r") as file:
-                    try:
-                        commit.append(json.load(file))
+                        datum.append(json.load(file))
                     except json.JSONDecodeError as error:
                         print(f"JSON error in file {entry.name}")
                         raise error
-                commits.append(tuple(commit))
+                data.append(tuple(datum))
 
-    return commits
-
-
-def get_bad_commits():
-    """Load bad commit data for tests."""
-    commits = []
-
-    with os.scandir("./tests/bad") as it:
-        for entry in it:
-            if entry.is_file():
-                commit = ""
-                with open(entry.path, "r") as file:
-                    for line in file:
-                        commit += line
-                commits.append(tuple([entry.path, commit]))
-
-    return tuple(commits)
+    return data
 
 
 @pytest.mark.parametrize(
-    "fn, commit",
-    create_raw_commit_files(),
+    "obj",
+    get_commits(),
 )
-def test_load_commits_file(fn, commit):
-    """Test loading commits from files."""
+def test_commits(obj):
+    """Test commits."""
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load("")
-    ccr.options.validate()
+    ccr.raw = obj[0]["raw"]
+    ccr.clean()
 
-    ccr.options.commit = fn
-    ccr.get()
+    if obj[0]["parseable"]:
+        ccr.parse()
 
-    assert ccr.raw == commit
+        assert ccr.header == obj[0]["header"]
+        assert ccr.body == obj[0]["body"]
+        assert ccr.breaking == obj[0]["breaking"]
+        assert ccr.footers == obj[0]["footers"]
+
+        assert str(ccr) == obj[0]["parsed"]
+        assert repr(ccr) == fr"ConventionalCommit(raw={ccr.raw})"
+
+        # Check header length.
+        if obj[0]["header"]["length"] > 50:
+            with pytest.raises(ValueError):
+                ccr.check_header_length()
+        else:
+            assert ccr.check_header_length() is True
+
+        # Check body length.
+        if obj[0]["body"]["longest"] > 72:
+            with pytest.raises(ValueError):
+                ccr.check_body_length()
+        else:
+            assert ccr.check_body_length() is True
+
+    else:
+        with pytest.raises(pp.ParseException):
+            ccr.parse()
 
 
 @pytest.mark.parametrize(
-    "fn, commit",
-    create_raw_commit_files(),
+    "obj",
+    get_commits(),
 )
-def test_load_commits_stdin(fn, commit, monkeypatch):
-    """Test loading commits from STDIN."""
-    ccr = pccc.ConventionalCommitRunner()
-    monkeypatch.setattr("sys.stdin", io.StringIO(commit))
-    ccr.options.load("")
-    ccr.options.validate()
+def test_main_file(obj, fs):
+    """Test pccc.main() with commits from files."""
+    fn = "./commit-msg"
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        file.write(obj[0]["raw"])
 
-    ccr.options.commit = fn
-    ccr.get()
+    if obj[0]["parseable"]:
+        if not ("header_length" in obj[0]["errors"]):
+            with pytest.raises(SystemExit) as error:
+                pccc.main([fn])
+                assert error.code == 0
+        else:
+            with pytest.raises(SystemExit) as error:
+                pccc.main([fn])
+                assert error.code == 1
+    else:
+        with pytest.raises(SystemExit) as error:
+            pccc.main([fn])
+            assert error.code == 1
 
-    assert ccr.raw == commit
+
+@pytest.mark.parametrize(
+    "obj",
+    get_commits(),
+)
+def test_main_stdin(obj, monkeypatch):
+    """Test pccc.main() with commits from STDIN."""
+    monkeypatch.setattr("sys.stdin", io.StringIO(obj[0]["raw"]))
+
+    if obj[0]["parseable"]:
+        if not ("header_length" in obj[0]["errors"]):
+            with pytest.raises(SystemExit) as error:
+                pccc.main()
+                assert error.code == 0
+        else:
+            with pytest.raises(SystemExit) as error:
+                pccc.main()
+                assert error.code == 1
+    else:
+        with pytest.raises(SystemExit) as error:
+            pccc.main()
+            assert error.code == 1
 
 
 def test_load_nonexistent_commit_file():
@@ -116,91 +131,7 @@ def test_load_nonexistent_commit_file():
     ccr.options.load("")
     ccr.options.validate()
 
-    ccr.options.commit = "./tests/bad/nothere.json"
+    ccr.options.commit = "./tests/parser/nothere.json"
 
     with pytest.raises(FileNotFoundError):
         ccr.get()
-
-
-@pytest.mark.parametrize(
-    "obj",
-    get_good_commits(),
-)
-def test_good_commits(obj):
-    """Test good commits."""
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load("")
-    ccr.raw = obj[0]["raw"]
-    ccr.clean()
-    ccr.parse()
-
-    assert ccr.header == obj[0]["header"]
-    assert ccr.body == obj[0]["body"]
-    assert ccr.breaking == obj[0]["breaking"]
-    assert ccr.footers == obj[0]["footers"]
-
-    assert str(ccr) == obj[0]["parsed"]
-    assert repr(ccr) == fr"ConventionalCommit(raw={ccr.raw})"
-
-
-@pytest.mark.parametrize(
-    "fn, raw",
-    get_bad_commits(),
-)
-def test_bad_commits(fn, raw):
-    """Test bad commits."""
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load("")
-    ccr.raw = raw[0]
-    ccr.clean()
-    ccr.parse()
-
-    assert isinstance(ccr.exc, pp.ParseException)
-
-
-@pytest.mark.parametrize(
-    "fn, commit",
-    create_raw_commit_files(),
-)
-def test_main_good_commits_file(fn, commit):
-    """Test pccc.main() with good commits from files."""
-    with pytest.raises(SystemExit) as error:
-        pccc.main([fn])
-        assert error.code == 0
-
-
-@pytest.mark.parametrize(
-    "fn, commit",
-    create_raw_commit_files(),
-)
-def test_main_good_commits_stdin(fn, commit, monkeypatch):
-    """Test pccc.main() with good commits from STDIN."""
-    monkeypatch.setattr("sys.stdin", io.StringIO(commit))
-
-    with pytest.raises(SystemExit) as error:
-        pccc.main()
-        assert error.code == 0
-
-
-@pytest.mark.parametrize(
-    "fn, raw",
-    get_bad_commits(),
-)
-def test_main_bad_commits_files(fn, raw, monkeypatch):
-    """Test pccc.main() with bad commits from files."""
-    with pytest.raises(SystemExit) as error:
-        pccc.main([fn])
-        assert error.code == 1
-
-
-@pytest.mark.parametrize(
-    "fn, raw",
-    get_bad_commits(),
-)
-def test_main_bad_commits_stdin(fn, raw, monkeypatch):
-    """Test pccc.main() with bad commits from STDIN."""
-    monkeypatch.setattr("sys.stdin", io.StringIO(raw))
-
-    with pytest.raises(SystemExit) as error:
-        pccc.main()
-        assert error.code == 1
