@@ -17,5 +17,7 @@
     "separator": "",
     "value": ""
   },
-  "footers": []
+  "footers": [],
+  "cleaned": "fix: fix parser bug\n",
+  "valid": true
 }
