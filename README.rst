@@ -30,41 +30,52 @@ usable at the git ``commit-msg`` hook stage now.
 Roadmap
 ~~~~~~~
 
-#. Finish body wrapping. (target: 0.5.0)
+n#. Split validation and reformatting.  Validation will be the default
+   mode and will be active with no repair options set.  Validation
+   will exit with a return status of 0 or 1 only for use as a git
+   commit-msg hook.  Reformatting will be active if repair options are
+   set.  It will exit with return status 0 if the commit is already
+   valid, otherwise it will exit with return status 1 and print the
+   reformatted commit to standard output for the user to inspect.
+   (target: 0.5.0)
 
-   * fail if over
-   * rewrap if over
-   * do nothing if fine
-   * rewrap if fine
+#. Finish body and breaking change wrapping. (target: 0.5.0)
 
-#. General exception handling plan for commit files, configuration
-   files, configuration validation, parsing exceptions, and commit
-   validation. (target: 0.5.0)
-#. Implement spell checking. (target: 0.6.0)
+   * configuration option for fields to check
+   * create body length, header length, and breaking change line
+     length validation functions for validation mode
+   * rewrap if configured, otherwise do nothing for reformatting mode
 
-   * will not autocorrect
-   * communication: kick back to editor on errors, with comment line
-     to indicate acceptance
+#. Implement spell checking. (target: 0.5.0)
 
-#. Implement simple reformatting. (target: 0.7.0)
+   * create spelling validation function for validation mode
+   * flag questionable words, if any, if configured, other do nothing
+     for reformatting mode
 
-   * footer separator as ": " and not " #"
-   * "BREAKING-CHANGE" not "BREAKING CHANGE"
-   * set breaking flag (!) and "BREAKING-CHANGE"
+#. Implement simple output reformatting, with configuration options
+   and validation functions, operating in the validation/reformatting
+   mode described previously.  (target: 0.6.0)
+
+   * footer separator as ": " or " #"
+   * "BREAKING-CHANGE" or "BREAKING CHANGE"
+   * set breaking flag (!) and/or "BREAKING-CHANGE"
    * correct token capitalization ("BREAKING-CHANGE" not
      "breaking-change" or "Breaking-Change"; "Signed-off-by" not
      "Signed-Off-By" or "signed-off-by")
 
 #. Implement partial parsing on failure for correction and improved
-   exception handling. (target: 0.9.0 or later)
+   exception handling. (target: 0.7.0 or later)
 
    * header partial parsing
    * body partial parsing
    * breaking change partial parsing
    * footer partial parsing
 
+#. Feature freeze, strict semantic versioning, and finish alpha and
+   beta. (from 0.7.0 onward; first stable will be at 1.0.0)
+
 #. Implement custom hooks for handling per-project footers. (target:
-   0.9.0 or later)
+   2.0.0 or later)
 
 #. Integrate ``argparse`` help into documentation. (done: 0.3.3)
 #. Insert license information into all source files. (done: 0.3.3)
@@ -72,7 +83,7 @@ Roadmap
    0.3.3; poetry is configured but not used)
 #. Complete documentation integration and upload at Read The
    Docs. (done: 0.3.3)
-#. Github issue template based off current ``tests/good/*.json``
+#. Github issue template based off current ``tests/parser/*.json``
    files, with guidelines. (done: 0.3.3)
 #. JSON configuration support, via ``pccc`` entry in
    ``package.json``. (done: 0.3.3)
