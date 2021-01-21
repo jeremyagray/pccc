@@ -134,7 +134,7 @@ def test_nonexistent_default_files(capsys, fs):
 
     capture = capsys.readouterr()
 
-    error = "Unable to find configuration file .*," " using defaults and CLI options."
+    error = "Unable to find configuration file .*, using defaults and CLI options."
 
     assert re.search(error, capture.out)
 
@@ -226,3 +226,41 @@ def test_bad_json_file(capsys):
     error = "Ensure that file format matches extension"
 
     assert re.search(error, capture.out)
+
+
+def test_show_license_info(capsys):
+    """Test ``--show-license`` and ``--show-warranty`` CLI options."""
+    expected = """\
+pccc:  The Python Conventional Commit Checker.
+
+Copyright (C) 2021 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+    with pytest.raises(SystemExit):
+        ccr = pccc.ConventionalCommitRunner()
+        ccr.options.load(["--show-license"])
+
+        actual = capsys.readouterr().out
+
+        assert actual == expected
+
+    with pytest.raises(SystemExit):
+        ccr = pccc.ConventionalCommitRunner()
+        ccr.options.load(["--show-warranty"])
+
+        actual = capsys.readouterr().out
+
+        assert actual == expected

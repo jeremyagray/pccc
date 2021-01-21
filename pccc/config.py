@@ -8,6 +8,8 @@ import argparse
 import json
 import os
 import re
+import sys
+import textwrap
 
 import toml
 
@@ -454,7 +456,28 @@ def _load_toml_file(filename="./pyproject.toml"):
 
 def _create_argument_parser():
     """Create an argparse argument parser."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description="""\
+This program comes with ABSOLUTELY NO WARRANTY; for details type
+``pccc --show-warranty``.  This is free software, and you are welcome
+to redistribute it under certain conditions; type ``pccc
+--show-license`` for details.
+""",
+    )
+
+    parser.add_argument(
+        "--show-warranty",
+        nargs=0,
+        action=_ShowLicenseAction,
+        help="Show warranty information.",
+    )
+
+    parser.add_argument(
+        "--show-license",
+        nargs=0,
+        action=_ShowLicenseAction,
+        help="Show license information.",
+    )
 
     parser.add_argument(
         dest="commit",
@@ -594,6 +617,41 @@ def _create_argument_parser():
     )
 
     return parser
+
+
+class _ShowLicenseAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        license = """\
+pccc:  The Python Conventional Commit Checker.
+
+Copyright (C) 2021 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""
+        print(
+            "\n\n".join(
+                list(
+                    map(
+                        lambda item: "\n".join(textwrap.wrap(item.strip(), 72)),
+                        textwrap.dedent(license).strip().split("\n\n"),
+                    )
+                )
+            )
+        )
+
+        sys.exit(0)
 
 
 def _field_list_handler(s):
