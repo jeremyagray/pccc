@@ -13,29 +13,6 @@ sys.path.insert(0, "/home/gray/src/work/pccc")
 import pccc  # noqa: E402
 
 
-def setup_module():
-    """Generate files from testing data JSON files.
-
-    Currently, this produces a ``*.toml`` file from the ``pyproject``
-    field of the ``*.json`` file.
-    """
-    json_file_re = re.compile(r"\d{4}\.json$")
-
-    with os.scandir("./tests/config") as dir:
-        for entry in dir:
-            if entry.is_file() and json_file_re.match(entry.name):
-                with open(entry.path, "r") as file:
-                    try:
-                        data = json.load(file)
-                    except json.JSONDecodeError as error:
-                        print(f"JSON error in file {file}")
-                        raise error
-
-                toml_fn = re.sub(r"json$", "toml", entry.path)
-                with open(toml_fn, "w") as file:
-                    file.write(data["pyproject"])
-
-
 def load_configuration_data():
     """Load configuration data for testing."""
     data = []
@@ -59,16 +36,24 @@ def load_configuration_data():
     "fn, data",
     load_configuration_data(),
 )
-def test_repr(fn, data):
+def test_repr(fn, data, fs):
     """Test Config().__repr__()."""
     # TOML configuration file.
-    ccr = pccc.ConventionalCommitRunner()
-    file = re.sub(r"json$", "toml", fn)
-    ccr.options.load(["--config", file] + data["cli"])
+    fn_toml = re.sub(r"json$", "toml", fn)
+    fs.create_file(fn_toml)
+    with open(fn_toml, "w") as file:
+        file.write(data["pyproject"])
 
-    assert repr(ccr.options) == re.sub(r"\./pyproject\.toml", file, data["repr"])
+    ccr = pccc.ConventionalCommitRunner()
+    ccr.options.load(["--config", fn_toml] + data["cli"])
+
+    assert repr(ccr.options) == re.sub(r"\./pyproject\.toml", fn_toml, data["repr"])
 
     # JSON configuration file.
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        json.dump(data, file, indent=2)
+
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load(["--config", fn] + data["cli"])
 
@@ -79,16 +64,24 @@ def test_repr(fn, data):
     "fn, data",
     load_configuration_data(),
 )
-def test_str(fn, data):
+def test_str(fn, data, fs):
     """Test Config().__str__()."""
     # TOML configuration file.
+    fn_toml = re.sub(r"json$", "toml", fn)
+    fs.create_file(fn_toml)
+    with open(fn_toml, "w") as file:
+        file.write(data["pyproject"])
+
     ccr = pccc.ConventionalCommitRunner()
-    file = re.sub(r"json$", "toml", fn)
-    ccr.options.load(["--config", file] + data["cli"])
+    ccr.options.load(["--config", fn_toml] + data["cli"])
 
     assert str(ccr.options) == data["str"]
 
     # JSON configuration file.
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        json.dump(data, file, indent=2)
+
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load(["--config", fn] + data["cli"])
 
@@ -99,12 +92,16 @@ def test_str(fn, data):
     "fn, data",
     load_configuration_data(),
 )
-def test_validity(fn, data):
+def test_validity(fn, data, fs):
     """Test Config().validate()."""
     # TOML configuration file.
+    fn_toml = re.sub(r"json$", "toml", fn)
+    fs.create_file(fn_toml)
+    with open(fn_toml, "w") as file:
+        file.write(data["pyproject"])
+
     ccr = pccc.ConventionalCommitRunner()
-    file = re.sub(r"json$", "toml", fn)
-    ccr.options.load(["--config", file] + data["cli"])
+    ccr.options.load(["--config", fn_toml] + data["cli"])
 
     if data["valid"]:
         assert ccr.options.validate() is True
@@ -113,6 +110,10 @@ def test_validity(fn, data):
             ccr.options.validate()
 
     # JSON configuration file.
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        json.dump(data, file, indent=2)
+
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load(["--config", fn] + data["cli"])
 
