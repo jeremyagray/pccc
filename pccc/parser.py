@@ -478,7 +478,8 @@ def main(argv=None):
     Creates a ``ConventionalCommitRunner()``; loads the configuration
     options; gets, cleans, and parses the commit; checks for
     exceptions; and exits the program with a 0 for success, 1 for
-    failure.
+    failure.  Additionally, the commit message is mirrored to standard
+    output unchanged on failure.
     """
     runner = ConventionalCommitRunner()
     runner.options.load(argv)
@@ -488,12 +489,17 @@ def main(argv=None):
 
     try:
         runner.parse()
-        runner.check_header_length()
-        runner.check_body_length()
+        runner.validate_header_length()
+        runner.post_process()
         sys.exit(0)
     except ValueError as error:
-        print(error)
+        print(error, file=sys.stderr)
+        print(runner.raw, file=sys.stdout)
         sys.exit(1)
     except pp.ParseException as error:
-        print(f"parse error at {error.lineno}:{error.col}: {error.line}")
+        print(
+            f"parse error at {error.lineno}:{error.col}: {error.line}",
+            file=sys.stderr,
+        )
+        print(runner.raw, file=sys.stdout)
         sys.exit(1)
