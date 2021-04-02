@@ -30,9 +30,20 @@ def get_commits():
                     except json.JSONDecodeError as error:
                         print(f"JSON error in file {entry.name}")
                         raise error
+                datum[0]["filename"] = entry.name
                 data.append(tuple(datum))
 
     return data
+
+
+@pytest.fixture
+def config():
+    """Load configuration file."""
+    fn = "./pyproject.toml"
+    with open(fn, "r") as f:
+        conf_data = f.read()
+
+    return conf_data
 
 
 @pytest.mark.parametrize(
@@ -80,8 +91,15 @@ def test_commits(obj):
     "obj",
     get_commits(),
 )
-def test_main_file(obj, fs):
+def test_main_file(config, obj, fs, capsys):
     """Test pccc.main() with commits from files."""
+    # Commit message.
+    fn = "./pyproject.toml"
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        file.write(config)
+
+    # Commit message.
     fn = "./commit-msg"
     fs.create_file(fn)
     with open(fn, "w") as file:
@@ -91,38 +109,56 @@ def test_main_file(obj, fs):
         if not ("header_length" in obj[0]["errors"]):
             with pytest.raises(SystemExit) as error:
                 pccc.main([fn])
-                assert error.code == 0
+            capture = capsys.readouterr()
+            assert capture.out == ""
+            assert error.type == SystemExit
+            assert error.value.code == 0
         else:
             with pytest.raises(SystemExit) as error:
                 pccc.main([fn])
-                assert error.code == 1
+            capture = capsys.readouterr()
+            assert capture.out[:-1] == obj[0]["raw"]
+            assert error.type == SystemExit
+            assert error.value.code == 1
     else:
         with pytest.raises(SystemExit) as error:
             pccc.main([fn])
-            assert error.code == 1
+        capture = capsys.readouterr()
+        assert capture.out[:-1] == obj[0]["raw"]
+        assert error.type == SystemExit
+        assert error.value.code == 1
 
 
 @pytest.mark.parametrize(
     "obj",
     get_commits(),
 )
-def test_main_stdin(obj, monkeypatch):
+def test_main_stdin(config, obj, monkeypatch, fs):
     """Test pccc.main() with commits from STDIN."""
+    # Configuration file.
+    fn = "./pyproject.toml"
+    fs.create_file(fn)
+    with open(fn, "w") as file:
+        file.write(config)
+
     monkeypatch.setattr("sys.stdin", io.StringIO(obj[0]["raw"]))
 
     if obj[0]["parseable"]:
         if not ("header_length" in obj[0]["errors"]):
             with pytest.raises(SystemExit) as error:
-                pccc.main()
-                assert error.code == 0
+                pccc.main([])
+            assert error.type == SystemExit
+            assert error.value.code == 0
         else:
             with pytest.raises(SystemExit) as error:
-                pccc.main()
-                assert error.code == 1
+                pccc.main([])
+            assert error.type == SystemExit
+            assert error.value.code == 1
     else:
         with pytest.raises(SystemExit) as error:
-            pccc.main()
-            assert error.code == 1
+            pccc.main([])
+        assert error.type == SystemExit
+        assert error.value.code == 1
 
 
 def test_load_nonexistent_commit_file():
