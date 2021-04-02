@@ -118,6 +118,7 @@ toml = "^0.10"
 
 [tool.poetry.dev-dependencies]
 
+Sphinx = "^3.4"
 black = { version = "*", allow-prereleases = true }
 isort = "^5.6"
 pre-commit = "^2.9"
