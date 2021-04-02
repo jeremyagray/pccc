@@ -71,16 +71,16 @@ def test_commits(obj):
         # Check header length.
         if obj[0]["header"]["length"] > 50:
             with pytest.raises(ValueError):
-                ccr.check_header_length()
+                ccr.validate_header_length()
         else:
-            assert ccr.check_header_length() is True
+            assert ccr.validate_header_length() is True
 
         # Check body length.
         if obj[0]["body"]["longest"] > 72:
             with pytest.raises(ValueError):
-                ccr.check_body_length()
+                ccr.validate_body_length()
         else:
-            assert ccr.check_body_length() is True
+            assert ccr.validate_body_length() is True
 
     else:
         with pytest.raises(pp.ParseException):

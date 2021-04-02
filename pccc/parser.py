@@ -241,7 +241,7 @@ class ConventionalCommitRunner(ConventionalCommit):
             print(f"{error.strerror}: {error.filename}")
             raise
 
-    def check_header_length(self):
+    def validate_header_length(self):
         """Check that header length is correct.
 
         Check that header length is less than or equal to
@@ -261,7 +261,7 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         return True
 
-    def check_body_length(self):
+    def validate_body_length(self):
         """Check that maximum body length is correct.
 
         Check that the maximum body line length is less than or equal
@@ -280,6 +280,36 @@ class ConventionalCommitRunner(ConventionalCommit):
             )
 
         return True
+
+    def check_body_length(self):
+        """Check that maximum body length is correct.
+
+        Check that the maximum body line length is less than or equal
+        to ``self.options.body_length``.
+
+        Returns
+        ------
+        boolean
+            ``True`` if the maximum body line length is less than or
+            equal to ``self.options.body_length``, ``False``
+            otherwise.
+        """
+        if self.body["longest"] > self.options.body_length:
+            return False
+
+        return True
+
+    def validate(self):
+        """Validate a commit after parsing."""
+        self.validate_header_length()
+
+    def post_process(self):
+        """Process commit after parsing."""
+        # if ((self.options.wrap
+        #      and not self.check_body_length())
+        #     or self.options.rewrap):
+        #     self.wrap()
+        self.wrap()
 
     def wrap(self):
         """Wrap a commit body to a given length."""
