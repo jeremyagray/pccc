@@ -36,6 +36,12 @@ class Config:
       Rewrap body; default is ``False``.
     spell_check : boolean
       Spell check header and body; default is ``False``.
+    ignore_generated_commits : boolean
+      Ignore generated commits which match ``generated_commits``
+      regular expressions; default is ``False``.
+    generated_commits : [string]
+        List of generated commits, as regular expressions; default is
+        ``[]``.
     types : [string]
         List of header types; default is ``['feat', 'fix']``.
     scopes : [string]
@@ -55,6 +61,8 @@ class Config:
         repair=False,
         rewrap=False,
         spell_check=False,
+        ignore_generated_commits=False,
+        generated_commits=[],
         types=["feat", "fix"],
         scopes=[],
         footers=[],
@@ -76,6 +84,8 @@ class Config:
         self.repair = repair
         self.rewrap = rewrap
         self.spell_check = spell_check
+        self.ignore_generated_commits = ignore_generated_commits
+        self.generated_commits = generated_commits
         self.types = types
         self.scopes = scopes
         self.footers = footers
@@ -113,9 +123,22 @@ class Config:
         else:
             rs += "spell_check = false\n"
 
+        if self.ignore_generated_commits:
+            rs += "ignore_generated_commits = true\n"
+        else:
+            rs += "ignore_generated_commits = false\n"
+
         rs += "\n"
 
-        # rs += "types = [\n" + "\n".join(map(lambda item: f'  "{item}",', self.types))
+        rs += "generated_commits = [\n" + ",\n".join(
+            map(lambda item: f'  "{item}"', self.generated_commits)
+        )
+
+        if len(self.generated_commits):
+            rs += "\n]\n\n"
+        else:
+            rs += "]\n\n"
+
         rs += "types = [\n" + ",\n".join(map(lambda item: f'  "{item}"', self.types))
 
         if len(self.types):
@@ -166,6 +189,8 @@ class Config:
             f"repair={self.repair}, "
             f"rewrap={self.rewrap}, "
             f"spell_check={self.spell_check}, "
+            f"ignore_generated_commits={self.ignore_generated_commits}, "
+            f"generated_commits={self.generated_commits}, "
             f"types={self.types}, "
             f"scopes={self.scopes}, "
             f"footers={self.footers}, "
@@ -377,12 +402,15 @@ def _load_json_file(filename="./package.json"):
         "header_length": None,
         "body_length": None,
         "spell_check": None,
+        "ignore_generated_commits": None,
         "rewrap": None,
         "repair": None,
         "types": None,
         "scopes": None,
         "footers": None,
         "required_footers": None,
+        "ignore_generated_commits": None,
+        "generated_commits": None,
     }
 
     for (k, v) in config["pccc"].items():
@@ -446,6 +474,8 @@ def _load_toml_file(filename="./pyproject.toml"):
         "scopes": None,
         "footers": None,
         "required_footers": None,
+        "ignore_generated_commits": None,
+        "generated_commits": None,
     }
 
     for (k, v) in config["tool"]["pccc"].items():
@@ -534,6 +564,26 @@ to redistribute it under certain conditions; type ``pccc
         default=None,
         action="store_false",
         help="Do not spell check the commit.  Default is no spell checking.",
+    )
+
+    ignore_group = parser.add_mutually_exclusive_group()
+    ignore_group.add_argument(
+        "-i",
+        "--ignore-generated-commits",
+        dest="ignore_generate_commits",
+        default=None,
+        action="store_true",
+        help="Ignore generated commits that match the patterns in"
+        " ``generated_commits``.  Default is to check every commit.",
+    )
+    ignore_group.add_argument(
+        "-I",
+        "--no-ignore-generated-commits",
+        dest="ignore_generated_commits",
+        default=None,
+        action="store_false",
+        help="Do not ignore generated commits that match the patterns in"
+        " ``generated_commits``.  Default is to check every commit.",
     )
 
     rewrap_group = parser.add_mutually_exclusive_group()

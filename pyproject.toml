@@ -48,6 +48,12 @@ body_length = 72
 rewrap = true
 spell_check = false
 repair = false
+ignore_generated_commits = true
+
+generated_commits = [
+"\\(tag:",
+"Merge branch"
+]
 
 types = [
 "build",

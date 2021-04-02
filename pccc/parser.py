@@ -501,6 +501,28 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         return
 
+    def should_ignore(self):
+        """Decide whether a commit message should be ignored.
+
+        Check if ``self.options.ignore_generated_commits`` is ``True``
+        and if the commit matches one of the regular expressions in
+        ``self.options.generated_commits``.
+
+        Returns
+        ------
+        boolean
+            ``True`` if the commit matches a generated commit pattern
+            and ignoring generated commits is allowed, ``False``
+            otherwise.
+        """
+        if self.options.ignore_generated_commits:
+            for pattern in self.options.generated_commits:
+                msgRE = re.compile(pattern)
+                if msgRE.match(self.raw):
+                    return True
+
+        return False
+
 
 def main(argv=None):
     """Run the default program.
@@ -515,6 +537,11 @@ def main(argv=None):
     runner.options.load(argv)
     runner.options.validate()
     runner.get()
+
+    # Check for generated commits and maybe bail.
+    if runner.should_ignore():
+        sys.exit(0)
+
     runner.clean()
 
     try:
