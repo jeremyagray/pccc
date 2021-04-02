@@ -1,5 +1,6 @@
+======
 pccc
-----
+======
 
 The Python Conventional Commit Checker.
 
@@ -11,7 +12,7 @@ The Python Conventional Commit Checker.
    :alt: Documentation Status
 
 What is pccc?
-~~~~~~~~~~~~~
+=============
 
 pccc is a PyParsing based grammar and script for parsing and verifying
 a commit message is a conventional commit.  The default grammar
@@ -28,16 +29,17 @@ exceptions, it will return 0, otherwise 1.  This interface should be
 usable at the git ``commit-msg`` hook stage now.
 
 Roadmap
-~~~~~~~
+=======
 
 n#. Split validation and reformatting.  Validation will be the default
    mode and will be active with no repair options set.  Validation
    will exit with a return status of 0 or 1 only for use as a git
-   commit-msg hook.  Reformatting will be active if repair options are
-   set.  It will exit with return status 0 if the commit is already
-   valid, otherwise it will exit with return status 1 and print the
-   reformatted commit to standard output for the user to inspect.
-   (target: 0.5.0)
+   commit-msg hook and will mirror the commit message unchanged to
+   standard output on failure.  Reformatting will be active if repair
+   options are set.  It will exit with return status 0 if the commit
+   is already valid, otherwise it will exit with return status 1 and
+   print the reformatted commit to standard output for the user to
+   inspect.  (target: 0.5.0)
 
 #. Finish body and breaking change wrapping. (target: 0.5.0)
 
@@ -49,8 +51,8 @@ n#. Split validation and reformatting.  Validation will be the default
 #. Implement spell checking. (target: 0.5.0)
 
    * create spelling validation function for validation mode
-   * flag questionable words, if any, if configured, other do nothing
-     for reformatting mode
+   * flag questionable words, if any, if configured, otherwise do
+     nothing for reformatting mode
 
 #. Implement simple output reformatting, with configuration options
    and validation functions, operating in the validation/reformatting
@@ -92,7 +94,7 @@ n#. Split validation and reformatting.  Validation will be the default
 #. Add and configure tox. (done: 0.4.0)
 
 Installation
-~~~~~~~~~~~~
+============
 
 Install pccc with::
 
@@ -116,7 +118,7 @@ from the current working directory to an appropriate configuration
 file.
 
 Usage
-~~~~~
+=====
 
 Console::
 
@@ -138,7 +140,7 @@ See the source and `documentation
 <https://pccc.readthedocs.io/en/latest/>`_ for more information.
 
 Configuration
-~~~~~~~~~~~~~
+=============
 
 See ``pccc.toml`` for an example ``[tool.pccc]`` section that may be
 copied into a ``pyproject.toml`` file.  The same entries may be used
@@ -146,7 +148,7 @@ in a ``pccc`` entry in ``package.json`` for JavaScript/TypeScript
 projects.
 
 Copyright and License
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 SPDX-License-Identifier: `GPL-3.0-or-later
 <https://spdx.org/licenses/GPL-3.0-or-later.html>`_
@@ -170,6 +172,6 @@ You should have received a copy of the `GNU General Public License
 If not, see https://www.gnu.org/licenses/.
 
 Author
-~~~~~~
+======
 
 `Jeremy A Gray <jeremy.a.gray@gmail.com>`_
