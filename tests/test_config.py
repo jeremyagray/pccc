@@ -130,21 +130,19 @@ def test_validity(fn, data, fs):
 def test_nonexistent_default_files(capsys, fs):
     """Test output with non-existent default configuration files."""
     ccr = pccc.ConventionalCommitRunner()
-
     ccr.options.load("")
+    actual = capsys.readouterr().out
+    expected = "Unable to find configuration file .*, using defaults and CLI options."
 
-    capture = capsys.readouterr()
-
-    error = "Unable to find configuration file .*, using defaults and CLI options."
-
-    assert re.search(error, capture.out)
+    assert re.search(expected, actual)
 
 
-# Fake file system with malformed pyproject.toml.
-def test_bad_default_toml_file(capsys, fs):
-    """Test output with a malformed TOML default configuration file."""
+# Fake file system with malformed configuration files.
+def test_malformed_configuration_file(capsys, fs):
+    """Test output with malformed configuration files."""
     ccr = pccc.ConventionalCommitRunner()
 
+    # Write TOML file with JSON.
     fn = "./pyproject.toml"
     fs.create_file(fn)
     with open(fn, "w") as file:
@@ -158,12 +156,7 @@ def test_bad_default_toml_file(capsys, fs):
 
     assert re.search(error, capture.out)
 
-
-# Fake file system with malformed pyproject.toml.
-def test_bad_default_json_file(capsys, fs):
-    """Test output with a malformed JSON default configuration file."""
-    ccr = pccc.ConventionalCommitRunner()
-
+    # Write JSON file with TOML.
     fn = "./package.json"
     fs.create_file(fn)
     with open(fn, "w") as file:
@@ -178,55 +171,39 @@ def test_bad_default_json_file(capsys, fs):
     assert re.search(error, capture.out)
 
 
-def test_nonexistent_toml_file(capsys):
-    """Test output with a non-existent TOML configuration file."""
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load(["--config", "no.toml"])
+def test_nonexistent_configuration_file(capsys):
+    """Test output with non-existent configuration files."""
+    files = [
+        "no.toml",
+        "no.json",
+    ]
 
-    capture = capsys.readouterr()
+    for file in files:
+        ccr = pccc.ConventionalCommitRunner()
+        ccr.options.load(["--config", file])
+        actual = capsys.readouterr().out
+        expected = (
+            f"Unable to find configuration file {file},"
+            " using defaults and CLI options."
+        )
 
-    error = (
-        "Unable to find configuration file no.toml," " using defaults and CLI options."
-    )
-
-    assert re.search(error, capture.out)
-
-
-def test_nonexistent_json_file(capsys):
-    """Test output with a non-existent JSON configuration file."""
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load(["--config", "no.json"])
-    capture = capsys.readouterr()
-
-    error = (
-        "Unable to find configuration file no.json," " using defaults and CLI options."
-    )
-
-    assert re.search(error, capture.out)
+        assert re.search(expected, actual)
 
 
-def test_bad_toml_file(capsys):
-    """Test output with a malformed TOML configuration file."""
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load(["--config", "./tests/config/bad.toml"])
+def test_bad_configuration_files(capsys):
+    """Test output with bad configuration files."""
+    files = [
+        "./tests/config/bad.toml",
+        "./tests/config/bad.json",
+    ]
 
-    capture = capsys.readouterr()
+    for file in files:
+        ccr = pccc.ConventionalCommitRunner()
+        ccr.options.load(["--config", file])
+        actual = capsys.readouterr().out
+        expected = "Ensure that file format matches extension"
 
-    error = "Ensure that file format matches extension"
-
-    assert re.search(error, capture.out)
-
-
-def test_bad_json_file(capsys):
-    """Test output with a malformed JSON configuration file."""
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load(["--config", "./tests/config/bad.json"])
-
-    capture = capsys.readouterr()
-
-    error = "Ensure that file format matches extension"
-
-    assert re.search(error, capture.out)
+        assert re.search(expected, actual)
 
 
 def test_show_license_info(capsys):
