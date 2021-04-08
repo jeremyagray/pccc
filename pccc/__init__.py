@@ -29,6 +29,7 @@ Examples
 >>> ccr.parse()
 """
 from .config import Config
+from .exceptions import NotParseableError
 from .parser import ConventionalCommit
 from .parser import ConventionalCommitRunner
 from .parser import main
