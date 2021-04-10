@@ -38,11 +38,13 @@ class Config:
     spell_check : boolean
         Spell check header and body; default is ``False``.
     ignore_generated_commits : boolean
-      Ignore generated commits which match ``generated_commits``
-      regular expressions; default is ``False``.
+        Ignore generated commits which match ``generated_commits``
+        regular expressions; default is ``False``.
     generated_commits : [string]
-        List of generated commits, as regular expressions; default is
-        ``[]``.
+        List of generated commits, as Python regular expressions;
+        default is ``[]``.  For TOML files, it's probably best to use
+        the multiline single quote strings to reduce escaping
+        problems.
     types : [string]
         List of header types; default is ``['feat', 'fix']``.
     scopes : [string]
@@ -629,6 +631,18 @@ to redistribute it under certain conditions; type ``pccc
         type=_field_list_handler,
         help="List (comma delimited) of allowable types for the type field"
         " of header.  Default is `['fix', 'feat']`.",
+    )
+
+    parser.add_argument(
+        # "a" is for automatic.
+        "-a",
+        "--generated-commits",
+        dest="generated_commits",
+        default=None,
+        type=_field_list_handler,
+        help="List (comma delimited) of Python regular expressions that"
+        " match generated commits that should be ignored.  Mind the shell"
+        " escaping.  Default is ``[]``.",
     )
 
     parser.add_argument(

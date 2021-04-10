@@ -518,7 +518,7 @@ class ConventionalCommitRunner(ConventionalCommit):
         if self.options.ignore_generated_commits:
             for pattern in self.options.generated_commits:
                 msgRE = re.compile(pattern)
-                if msgRE.match(self.raw):
+                if msgRE.search(self.raw):
                     return True
 
         return False
