@@ -247,6 +247,11 @@ class ConventionalCommitRunner(ConventionalCommit):
         Check that header length is less than or equal to
         ``self.options.header_length``.
 
+        Returns
+        -------
+        boolean
+            True, if the header length validates.
+
         Raises
         ------
         ValueError
@@ -267,6 +272,11 @@ class ConventionalCommitRunner(ConventionalCommit):
         Check that the maximum body line length is less than or equal
         to ``self.options.body_length``.
 
+        Returns
+        -------
+        boolean
+            True, if the body length validates.
+
         Raises
         ------
         ValueError
@@ -275,33 +285,36 @@ class ConventionalCommitRunner(ConventionalCommit):
         """
         if self.body["longest"] > self.options.body_length:
             raise ValueError(
-                f"Commit header length ({self.body['longest']}) exceeds"
+                f"Commit body length ({self.body['longest']}) exceeds"
                 f" the maximum length ({self.options.body_length})."
             )
 
         return True
 
-    def check_body_length(self):
-        """Check that maximum body length is correct.
+    def validate(self):
+        """Validate a commit after parsing.
 
-        Check that the maximum body line length is less than or equal
-        to ``self.options.body_length``.
+        Validate a commit on header and body lengths.  Currently,
+        there is no need to validate other fields as the commit will
+        not parse if these are invalid.
 
         Returns
-        ------
+        -------
         boolean
-            ``True`` if the maximum body line length is less than or
-            equal to ``self.options.body_length``, ``False``
-            otherwise.
+            True, if the commit validates.
+
+        Raises
+        ------
+        ValueError
+            Indicates the commit did not validate.
         """
-        if self.body["longest"] > self.options.body_length:
-            return False
+        try:
+            self.validate_header_length()
+            # self.validate_body_length()
 
-        return True
-
-    def validate(self):
-        """Validate a commit after parsing."""
-        self.validate_header_length()
+            return True
+        except ValueError:
+            raise
 
     def post_process(self):
         """Process commit after parsing."""
@@ -546,7 +559,7 @@ def main(argv=None):
 
     try:
         runner.parse()
-        runner.validate_header_length()
+        runner.validate()
         runner.post_process()
         sys.exit(0)
     except ValueError as error:
