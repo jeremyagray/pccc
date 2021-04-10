@@ -96,11 +96,18 @@ class Config:
         self.footers = footers
         self.required_footers = required_footers
 
-    def __str__(self):
+    def __str__(self, fmt="TOML"):
         """Stringify a ``Config()`` object.
 
         String representation of a ``Config()`` object, as the
-        ``[tool.pccc]`` section of a pyproject.toml file.
+        ``[tool.pccc]`` section of a ``pyproject.toml`` file or as the
+        ``pccc`` entry of a JSON file such as ``package.json``.
+
+        Parameters
+        ----------
+        fmt : string
+           The output format.  Default is ``"TOML"``.  Currently
+           supported values are ``"TOML"`` and ``"JSON"``.
 
         Returns
         -------
@@ -108,73 +115,12 @@ class Config:
             The current configuration, as the [tool.pccc] section of a
             ``pyproject.toml`` file.
         """
-        rs = "[tool.pccc]\n"
-        rs += "\n"
-        rs += f"header_length = {self.header_length}\n"
-        rs += f"body_length = {self.body_length}\n"
-
-        if self.repair:
-            rs += "repair = true\n"
+        if fmt == "TOML":
+            rs = toml.dumps({"tool": {"pccc": self.config_as_dict()}})
+        elif fmt == "JSON":
+            rs = json.dumps({"pccc": self.config_as_dict()}, indent=2)
         else:
-            rs += "repair = false\n"
-
-        if self.rewrap:
-            rs += "rewrap = true\n"
-        else:
-            rs += "rewrap = false\n"
-
-        if self.spell_check:
-            rs += "spell_check = true\n"
-        else:
-            rs += "spell_check = false\n"
-
-        if self.ignore_generated_commits:
-            rs += "ignore_generated_commits = true\n"
-        else:
-            rs += "ignore_generated_commits = false\n"
-
-        rs += "\n"
-
-        rs += "generated_commits = [\n" + ",\n".join(
-            map(lambda item: f'  "{item}"', self.generated_commits)
-        )
-
-        if len(self.generated_commits):
-            rs += "\n]\n\n"
-        else:
-            rs += "]\n\n"
-
-        rs += "types = [\n" + ",\n".join(map(lambda item: f'  "{item}"', self.types))
-
-        if len(self.types):
-            rs += "\n]\n\n"
-        else:
-            rs += "]\n\n"
-
-        rs += "scopes = [\n" + ",\n".join(map(lambda item: f'  "{item}"', self.scopes))
-
-        if len(self.scopes):
-            rs += "\n]\n\n"
-        else:
-            rs += "]\n\n"
-
-        rs += "footers = [\n" + ",\n".join(
-            map(lambda item: f'  "{item}"', self.footers)
-        )
-
-        if len(self.footers):
-            rs += "\n]\n\n"
-        else:
-            rs += "]\n\n"
-
-        rs += "required_footers = [\n" + ",\n".join(
-            map(lambda item: f'  "{item}"', self.required_footers)
-        )
-
-        if len(self.required_footers):
-            rs += "\n]\n"
-        else:
-            rs += "]\n"
+            raise ValueError("Unknown configuration file format.")
 
         return rs
 
@@ -195,6 +141,33 @@ class Config:
             f"footers={self.footers}, "
             f"required_footers={self.required_footers})"
         )
+
+    def config_as_dict(self):
+        """Convert a ``Config()`` object to a ``dict``.
+
+        Convert a ``Config()`` object's configuration parameters to a
+        ``dict`` for using in dumping TOML and JSON data.
+
+        Returns
+        -------
+        dict
+            A ``dict`` containing key-value pairs of the configuration
+            parameters and their values.
+        """
+        return {
+            "commit": self.commit,
+            "header_length": self.header_length,
+            "body_length": self.body_length,
+            "repair": self.repair,
+            "rewrap": self.rewrap,
+            "spell_check": self.spell_check,
+            "ignore_generated_commits": self.ignore_generated_commits,
+            "generated_commits": self.generated_commits,
+            "types": self.types,
+            "scopes": self.scopes,
+            "footers": self.footers,
+            "required_footers": self.required_footers,
+        }
 
     def update(self, *args, **kwargs):
         """Update a configuration.
