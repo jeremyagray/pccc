@@ -13,6 +13,8 @@ import textwrap
 
 import toml
 
+from .exceptions import NotParseableError
+
 
 class Config:
     """Class for accessing and loading pccc configuration options.
@@ -316,6 +318,7 @@ def _load_file(filename="./pyproject.toml"):
     """
     options = {}
     jsonRE = re.compile(r"^.*\.json$", re.IGNORECASE)
+    tomlRE = re.compile(r"^.*\.toml$", re.IGNORECASE)
 
     if os.path.abspath(filename) == os.path.abspath("./pyproject.toml"):
         try:
@@ -324,13 +327,8 @@ def _load_file(filename="./pyproject.toml"):
         except toml.TomlDecodeError:
             raise
         except FileNotFoundError:
-            try:
-                # Then try ``./package.json``.
-                options = _load_json_file("./package.json")
-            except json.JSONDecodeError:
-                raise
-            except FileNotFoundError:
-                raise
+            # No file, bail.
+            raise
     elif jsonRE.match(filename):
         try:
             # Well, if JSON is supplied, use it.
@@ -339,12 +337,23 @@ def _load_file(filename="./pyproject.toml"):
             raise
         except FileNotFoundError:
             raise
+    elif tomlRE.match(filename):
+        try:
+            options = _load_toml_file(filename)
+        except toml.TomlDecodeError:
+            raise
+        except FileNotFoundError:
+            raise
     else:
         try:
             # Last chance, parse filename as TOML.
             options = _load_toml_file(filename)
         except toml.TomlDecodeError:
-            raise
+            # Okay, one last try.  Maybe it was JSON.
+            try:
+                options = _load_json_file(filename)
+            except json.JSONDecodeError:
+                raise NotParseableError(filename)
         except FileNotFoundError:
             raise
 
