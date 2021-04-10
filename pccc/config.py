@@ -31,11 +31,12 @@ class Config:
     body_length : int
        Maximum body line length; default is 72.
     repair : boolean
-      Repair commit, implying spell check and rewrap; default is ``False``.
+        Repair commit, implying spell check and rewrap; default is
+        ``False``.
     rewrap : boolean
-      Rewrap body; default is ``False``.
+        Rewrap body; default is ``False``.
     spell_check : boolean
-      Spell check header and body; default is ``False``.
+        Spell check header and body; default is ``False``.
     ignore_generated_commits : boolean
       Ignore generated commits which match ``generated_commits``
       regular expressions; default is ``False``.
@@ -153,9 +154,6 @@ class Config:
         else:
             rs += "]\n\n"
 
-        # rs += "footers = [\n" + "\n".join(
-        #     map(lambda item: f'  "{item}",', self.footers)
-        # )
         rs += "footers = [\n" + ",\n".join(
             map(lambda item: f'  "{item}"', self.footers)
         )
@@ -165,9 +163,6 @@ class Config:
         else:
             rs += "]\n\n"
 
-        # rs += "required_footers = [\n" + "\n".join(
-        #     map(lambda item: f'  "{item}",', self.required_footers)
-        # )
         rs += "required_footers = [\n" + ",\n".join(
             map(lambda item: f'  "{item}"', self.required_footers)
         )
