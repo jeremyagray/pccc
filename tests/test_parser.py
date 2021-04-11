@@ -121,12 +121,19 @@ def test_main_file(config, obj, fs, capsys):
             assert error.type == SystemExit
             assert error.value.code == 1
     else:
-        with pytest.raises(SystemExit) as error:
-            pccc.main([fn])
-        capture = capsys.readouterr()
-        assert capture.out[:-1] == obj[0]["raw"]
-        assert error.type == SystemExit
-        assert error.value.code == 1
+        try:
+            obj[0]["generated"]
+            with pytest.raises(SystemExit) as error:
+                pccc.main([fn])
+            assert error.type == SystemExit
+            assert error.value.code == 0
+        except KeyError:
+            with pytest.raises(SystemExit) as error:
+                pccc.main([fn])
+            capture = capsys.readouterr()
+            assert capture.out[:-1] == obj[0]["raw"]
+            assert error.type == SystemExit
+            assert error.value.code == 1
 
 
 @pytest.mark.parametrize(
@@ -155,10 +162,17 @@ def test_main_stdin(config, obj, monkeypatch, fs):
             assert error.type == SystemExit
             assert error.value.code == 1
     else:
-        with pytest.raises(SystemExit) as error:
-            pccc.main([])
-        assert error.type == SystemExit
-        assert error.value.code == 1
+        try:
+            obj[0]["generated"]
+            with pytest.raises(SystemExit) as error:
+                pccc.main([])
+            assert error.type == SystemExit
+            assert error.value.code == 0
+        except KeyError:
+            with pytest.raises(SystemExit) as error:
+                pccc.main([])
+            assert error.type == SystemExit
+            assert error.value.code == 1
 
 
 def test_load_nonexistent_commit_file():
