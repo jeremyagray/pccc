@@ -7,6 +7,7 @@ import shutil
 import sys
 
 import pytest
+import toml
 
 sys.path.insert(0, "/home/gray/src/work/pccc")
 
@@ -30,6 +31,163 @@ def load_configuration_data():
                 data.append(tuple([entry.path, datum]))
 
     return tuple(data)
+
+
+@pytest.mark.parametrize(
+    "fn, data",
+    load_configuration_data(),
+)
+def test_str_repr_property(fn, data, fs):
+    """Test ``Config().__str__()`` and ``Config().__repr__()``.
+
+    Test ``Config().__str__()`` and ``Config().__repr__()`` by writing
+    and loading the fixture data created to each other using TOML,
+    JSON, TOML then JSON, and JSON then TOML.  twice and then
+    comparing both the strings written and the objects
+    """
+    # Use the fixture's JSON to write a TOML file, then load the TOML
+    # and write a second file.  Then, assert that the two ``Config()``
+    # objects have equal reproductions and string representations.
+    fn = "one.toml"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        tdata = {"tool": {"pccc": data["pccc"]}}
+        toml.dump(tdata, f)
+
+    ccr_one = pccc.ConventionalCommitRunner()
+    ccr_one.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    fn = "two.toml"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        f.write(str(ccr_one.options))
+
+    ccr_two = pccc.ConventionalCommitRunner()
+    ccr_two.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    # Assert ``Config().__repr__()`` are equal.
+    ccr_one.options.set_format("TOML")
+    ccr_two.options.set_format("TOML")
+    assert repr(ccr_one.options) == re.sub(
+        r"two\.toml", "one.toml", repr(ccr_two.options)
+    )
+
+    # Assert ``Config().__str__()`` are equal.
+    ccr_one.options.set_format("TOML")
+    ccr_two.options.set_format("TOML")
+    assert str(ccr_one.options) == str(ccr_two.options)
+    ccr_one.options.set_format("JSON")
+    ccr_two.options.set_format("JSON")
+    assert str(ccr_one.options) == str(ccr_two.options)
+
+    # Use the fixture's JSON to write a JSON file, then load the JSON
+    # and write a second file.  Then, assert that the two ``Config()``
+    # objects have equal reproductions and string representations.
+    fn = "one.json"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        json.dump({"pccc": data["pccc"]}, f, indent=2)
+
+    ccr_three = pccc.ConventionalCommitRunner()
+    ccr_three.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    fn = "two.json"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        ccr_three.options.set_format("JSON")
+        f.write(str(ccr_three.options))
+
+    ccr_four = pccc.ConventionalCommitRunner()
+    ccr_four.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    # Assert ``Config().__repr__()`` are equal.
+    ccr_three.options.set_format("TOML")
+    ccr_four.options.set_format("TOML")
+    assert repr(ccr_three.options) == re.sub(
+        r"two\.json", "one.json", repr(ccr_four.options)
+    )
+
+    # Assert ``Config().__str__()`` are equal.
+    ccr_three.options.set_format("TOML")
+    ccr_four.options.set_format("TOML")
+    assert str(ccr_three.options) == str(ccr_four.options)
+    ccr_three.options.set_format("JSON")
+    ccr_four.options.set_format("JSON")
+    assert str(ccr_three.options) == str(ccr_four.options)
+
+    # Mixed case:  TOML, then JSON.
+    fn = "one.toml"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        toml.dump({"tool": {"pccc": data["pccc"]}}, f)
+
+    ccr_one = pccc.ConventionalCommitRunner()
+    ccr_one.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    fn = "two.json"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        ccr_one.options.set_format("JSON")
+        f.write(str(ccr_one.options))
+
+    ccr_two = pccc.ConventionalCommitRunner()
+    ccr_two.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    # Assert ``Config().__repr__()`` are equal.
+    ccr_one.options.set_format("TOML")
+    ccr_two.options.set_format("TOML")
+    assert repr(ccr_one.options) == re.sub(
+        r"two\.json", "one.toml", repr(ccr_two.options)
+    )
+
+    # Assert ``Config().__str__()`` are equal.
+    ccr_one.options.set_format("TOML")
+    ccr_two.options.set_format("TOML")
+    assert str(ccr_one.options) == str(ccr_two.options)
+    ccr_one.options.set_format("JSON")
+    ccr_two.options.set_format("JSON")
+    assert str(ccr_one.options) == str(ccr_two.options)
+
+    # Mixed case:  JSON, then TOML.
+    fn = "one.json"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        json.dump({"pccc": data["pccc"]}, f, indent=2)
+
+    ccr_one = pccc.ConventionalCommitRunner()
+    ccr_one.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    fn = "two.toml"
+    fs.create_file(fn)
+    with open(fn, "w") as f:
+        ccr_one.options.set_format("TOML")
+        f.write(str(ccr_one.options))
+
+    ccr_two = pccc.ConventionalCommitRunner()
+    ccr_two.options.load(["--config", fn] + data["cli"])
+    fs.remove_object(fn)
+
+    # Assert ``Config().__repr__()`` are equal.
+    ccr_one.options.set_format("TOML")
+    ccr_two.options.set_format("TOML")
+    assert repr(ccr_one.options) == re.sub(
+        r"two\.toml", "one.json", repr(ccr_two.options)
+    )
+
+    # Assert ``Config().__str__()`` are equal.
+    ccr_one.options.set_format("TOML")
+    ccr_two.options.set_format("TOML")
+    assert str(ccr_one.options) == str(ccr_two.options)
+    ccr_one.options.set_format("JSON")
+    ccr_two.options.set_format("JSON")
+    assert str(ccr_one.options) == str(ccr_two.options)
 
 
 @pytest.mark.parametrize(
@@ -118,52 +276,23 @@ def test_repr(fn, data, fs):
         )
         # repr contains correct footers list.
         assert re.search(
-            fr",\s+footers={re.escape(repr(ccr.options.footers))},\s+", actual["string"]
+            fr",\s+footers={re.escape(repr(ccr.options.footers))},\s+",
+            actual["string"],
         )
         # repr contains correct required footers list.
         assert re.search(
-            fr",\s+required_footers={re.escape(repr(ccr.options.required_footers))}\)",
+            r",\s+required_footers="
+            fr"{re.escape(repr(ccr.options.required_footers))},\s+",
+            actual["string"],
+        )
+        # repr contains correct format.
+        assert re.search(
+            fr",\s+format=\"{ccr.options.format}\"\)",
             actual["string"],
         )
 
         # repr ends with close parenthesis.
         assert re.search(r"\)$", actual["string"])
-
-
-@pytest.mark.parametrize(
-    "fn, data",
-    load_configuration_data(),
-)
-def test_str(fn, data, fs):
-    """Test Config().__str__()."""
-    # TOML configuration file.
-    fn_toml = re.sub(r"json$", "toml", fn)
-    fs.create_file(fn_toml)
-    with open(fn_toml, "w") as file:
-        file.write(data["pyproject"])
-
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load(["--config", fn_toml] + data["cli"])
-
-    fs.create_file("str.toml")
-    with open("str.toml", "w") as file:
-        file.write(str(ccr.options))
-
-    ccr2 = pccc.ConventionalCommitRunner()
-    ccr2.options.load(["--config", "str.toml"] + data["cli"])
-
-    assert str(ccr.options) == str(ccr2.options)
-
-    # JSON configuration file.
-    fs.create_file(fn)
-    with open(fn, "w") as file:
-        json.dump(data, file, indent=2)
-
-    ccr3 = pccc.ConventionalCommitRunner()
-    ccr3.options.load(["--config", fn] + data["cli"])
-
-    assert str(ccr.options) == str(ccr3.options)
-    assert str(ccr2.options) == str(ccr3.options)
 
 
 @pytest.mark.parametrize(

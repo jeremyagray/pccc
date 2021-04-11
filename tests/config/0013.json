@@ -1,6 +1,6 @@
 {
   "valid": true,
-  "pyproject": "[tool.pccc]\n\nheader_length = 50\nbody_length = 72\nrewrap = true\nspell_check = false\nrepair = false\n\ntypes = [\n  \"build\",\n  \"docs\",\n  \"feat\",\n  \"fix\",\n  \"refactor\",\n  \"test\"\n]\n\nscopes = [\n  \"config\",\n  \"parser\"\n]\n\nfooters = [\n  \"signed-off-by\"\n]\n\nrequired_footers = [\n  \"signed-off-by\"\n]\n",
+  "pyproject": "[tool.pccc]\n\nheader_length = 50\nbody_length = 72\nrewrap = true\nspell_check = false\nrepair = false\nignore_generated_commits = true\n\ngenerated_commits = [\n\"Merge branch \"\n]\n\ntypes = [\n  \"build\",\n  \"docs\",\n  \"feat\",\n  \"fix\",\n  \"refactor\",\n  \"test\"\n]\n\nscopes = [\n  \"config\",\n  \"parser\"\n]\n\nfooters = [\n  \"signed-off-by\"\n]\n\nrequired_footers = [\n  \"signed-off-by\"\n]\n",
   "pccc": {
     "header_length": 50,
     "body_length": 72,
