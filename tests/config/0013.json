@@ -7,6 +7,10 @@
     "rewrap": true,
     "spell_check": false,
     "repair": false,
+    "ignore_generated_commits": true,
+    "generated_commits": [
+      "Merge branch "
+    ],
     "types": [
       "build",
       "docs",
@@ -36,6 +40,10 @@
     "rewrap": true,
     "spell_check": false,
     "repair": false,
+    "ignore_generated_commits": true,
+    "generated_commits": [
+      "Merge branch "
+    ],
     "types": [
       "build",
       "docs",
