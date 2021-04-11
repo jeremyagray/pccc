@@ -26,20 +26,19 @@ commit header and commit body and spelling can also be checked.
 Currently, the script interface will load configuration options and a
 commit message and attempt to parse it.  If there are no parse
 exceptions, it will return 0, otherwise 1.  This interface should be
-usable at the git ``commit-msg`` hook stage now.
+usable at the git ``commit-msg`` hook stage now.  It can also be
+configured to ignore certain automatically generated commits (from
+``git pull`` for instance) if it is not desirable or possible to
+generate those commits as conventional commits (preferable).
 
 Roadmap
 =======
 
-n#. Split validation and reformatting.  Validation will be the default
-   mode and will be active with no repair options set.  Validation
-   will exit with a return status of 0 or 1 only for use as a git
-   commit-msg hook and will mirror the commit message unchanged to
-   standard output on failure.  Reformatting will be active if repair
-   options are set.  It will exit with return status 0 if the commit
-   is already valid, otherwise it will exit with return status 1 and
-   print the reformatted commit to standard output for the user to
-   inspect.  (target: 0.5.0)
+#. Implement complete interoperability with TOML and JSON for
+   configuration. (target: 0.5.0)
+
+   * ``Config().__str__()`` should output either format (finished: 0.4.3)
+   * streamline testing fixture data formats
 
 #. Finish body and breaking change wrapping. (target: 0.5.0)
 
@@ -51,8 +50,11 @@ n#. Split validation and reformatting.  Validation will be the default
 #. Implement spell checking. (target: 0.5.0)
 
    * create spelling validation function for validation mode
-   * flag questionable words, if any, if configured, otherwise do
-     nothing for reformatting mode
+   * if enabled, mirror raw commit and questionable words to standard
+     output and return a non-zero exit code
+   * questionable words will be ignored by adding the words to the
+     commented ``ignore-spelling: `` field
+     (``r"^\s*#\s*ignore-spelling:\s+``).
 
 #. Implement simple output reformatting, with configuration options
    and validation functions, operating in the validation/reformatting
@@ -79,19 +81,29 @@ n#. Split validation and reformatting.  Validation will be the default
 #. Implement custom hooks for handling per-project footers. (target:
    2.0.0 or later)
 
-#. Integrate ``argparse`` help into documentation. (done: 0.3.3)
-#. Insert license information into all source files. (done: 0.3.3)
-#. Complete upload and build for setuptools/pip and poetry. (done:
+#. Integrate ``argparse`` help into documentation. (finished: 0.3.3)
+#. Insert license information into all source files. (finished: 0.3.3)
+#. Complete upload and build for setuptools/pip and poetry. (finished:
    0.3.3; poetry is configured but not used)
 #. Complete documentation integration and upload at Read The
-   Docs. (done: 0.3.3)
+   Docs. (finished: 0.3.3)
 #. Github issue template based off current ``tests/parser/*.json``
-   files, with guidelines. (done: 0.3.3)
+   files, with guidelines. (finished: 0.3.3)
 #. JSON configuration support, via ``pccc`` entry in
-   ``package.json``. (done: 0.3.3)
-#. 100% test coverage, with tests implemented before merging. (done:
-   0.3.4)
-#. Add and configure tox. (done: 0.4.0)
+   ``package.json``. (finished: 0.3.3)
+#. 100% test coverage, with tests implemented before
+   merging. (finished: 0.3.4)
+#. Add and configure tox. (finished: 0.4.0)
+#. Split validation and reformatting.  Validation will be the default
+   mode and will be active with no repair options set.  Validation
+   will exit with a return status of 0 or 1 only for use as a git
+   commit-msg hook and will mirror the commit message unchanged to
+   standard output on failure.  Reformatting will be active if repair
+   options are set.  It will exit with return status 0 if the commit
+   is already valid, otherwise it will exit with return status 1 and
+   print the reformatted commit to standard output for the user to
+   inspect.  (finished: 0.4.2)
+
 
 Installation
 ============
