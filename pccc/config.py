@@ -82,6 +82,7 @@ class Config:
         object
             A Config() object.
         """
+        # Configuration attributes.
         self.commit = commit
         self.config_file = config_file
         self.header_length = header_length
@@ -96,7 +97,10 @@ class Config:
         self.footers = footers
         self.required_footers = required_footers
 
-    def __str__(self, fmt="TOML"):
+        # Other attributes.
+        self.format = "TOML"
+
+    def __str__(self):
         """Stringify a ``Config()`` object.
 
         String representation of a ``Config()`` object, as the
@@ -115,12 +119,12 @@ class Config:
             The current configuration, as the [tool.pccc] section of a
             ``pyproject.toml`` file.
         """
-        if fmt == "TOML":
-            rs = toml.dumps({"tool": {"pccc": self.config_as_dict()}})
-        elif fmt == "JSON":
+        if self.format == "JSON":
+            # JSON, if requested.
             rs = json.dumps({"pccc": self.config_as_dict()}, indent=2)
         else:
-            raise ValueError("Unknown configuration file format.")
+            # TOML, by default.
+            rs = toml.dumps({"tool": {"pccc": self.config_as_dict()}})
 
         return rs
 
@@ -139,8 +143,22 @@ class Config:
             f"types={self.types}, "
             f"scopes={self.scopes}, "
             f"footers={self.footers}, "
-            f"required_footers={self.required_footers})"
+            f"required_footers={self.required_footers}, "
+            f'format="{self.format}")'
         )
+
+    def set_format(self, format):
+        """Set the output format.
+
+        Set the output format of ``Config().__str__()`` to either
+        ``"TOML"`` or ``"JSON"``.
+        """
+        if format == "JSON":
+            self.format = "JSON"
+        else:
+            self.format = "TOML"
+
+        return
 
     def config_as_dict(self):
         """Convert a ``Config()`` object to a ``dict``.
