@@ -51,8 +51,8 @@ repair = false
 ignore_generated_commits = true
 
 generated_commits = [
-"\\(tag:",
-"Merge branch"
+'''^\(tag:\s+v\d+\.\d+\.\d\)\s+\d+\.\d+\.\d+$''',
+'''^Merge branch 'master' of.*$''',
 ]
 
 types = [
