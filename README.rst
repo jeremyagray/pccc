@@ -78,6 +78,8 @@ Roadmap
 #. Feature freeze, strict semantic versioning, and finish alpha and
    beta. (from 0.7.0 onward; first stable will be at 1.0.0)
 
+#. Add YAML and BespON configuration file support. (target: after 1.0.0)
+
 #. Implement custom hooks for handling per-project footers. (target:
    2.0.0 or later)
 
