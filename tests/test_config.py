@@ -8,6 +8,9 @@ import sys
 
 import pytest
 import toml
+from hypothesis import example
+from hypothesis import given
+from hypothesis import strategies as st
 
 sys.path.insert(0, "/home/gray/src/work/pccc")
 
@@ -33,17 +36,241 @@ def load_configuration_data():
     return tuple(data)
 
 
+def tomlify_list(list):
+    """Stringify a list as ``toml.dumps()`` would."""
+    if list:
+        return '[ "' + '", "'.join(list) + '",]'
+    else:
+        return "[]"
+
+
+@given(
+    header=st.integers(min_value=50, max_value=50),
+    body=st.integers(min_value=70, max_value=120),
+    repair=st.booleans(),
+    rewrap=st.booleans(),
+    spell_check=st.booleans(),
+    ignore_generated_commits=st.booleans(),
+    generated_commits=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N", "P"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    types=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    scopes=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    footers=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    required_footers=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+)
+def test_str_config_hypothesis(
+    header,
+    body,
+    repair,
+    rewrap,
+    spell_check,
+    ignore_generated_commits,
+    generated_commits,
+    types,
+    scopes,
+    footers,
+    required_footers,
+):
+    """Should stringify a config."""
+    ccr = pccc.ConventionalCommitRunner()
+    ccr.options.load([])
+    ccr.options.header_length = header
+    ccr.options.body_length = body
+    ccr.options.repair = repair
+    ccr.options.rewrap = rewrap
+    ccr.options.spell_check = spell_check
+    ccr.options.ignore_generated_commits = ignore_generated_commits
+    ccr.options.generated_commits = generated_commits
+    ccr.options.types = types
+    ccr.options.scopes = scopes
+    ccr.options.footers = footers
+    ccr.options.required_footers = required_footers
+
+    # Assert the TOML is correct.
+    assert f"header_length = {header}" in str(ccr.options)
+    assert f"body_length = {body}" in str(ccr.options)
+    assert f"repair = {str(repair).lower()}" in str(ccr.options)
+    assert f"rewrap = {str(rewrap).lower()}" in str(ccr.options)
+    assert f"spell_check = {str(spell_check).lower()}" in str(ccr.options)
+    assert f"ignore_generated_commits = {str(ignore_generated_commits).lower()}" in str(
+        ccr.options
+    )
+    assert f"types = {tomlify_list(types)}" in str(ccr.options)
+
+    # Assert the JSON is correct.
+    ccr.options.set_format("JSON")
+    assert f'"header_length": {header}' in str(ccr.options)
+    assert f'"body_length": {body}' in str(ccr.options)
+    assert f'"repair": {str(repair).lower()}' in str(ccr.options)
+    assert f'"rewrap": {str(rewrap).lower()}' in str(ccr.options)
+    assert f'"spell_check": {str(spell_check).lower()}' in str(ccr.options)
+    assert (
+        f'"ignore_generated_commits": {str(ignore_generated_commits).lower()}'
+        in str(ccr.options)
+    )
+
+
+@given(
+    header=st.integers(min_value=50, max_value=50),
+    body=st.integers(min_value=70, max_value=120),
+    repair=st.booleans(),
+    rewrap=st.booleans(),
+    spell_check=st.booleans(),
+    ignore_generated_commits=st.booleans(),
+    generated_commits=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N", "P"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    types=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    scopes=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    footers=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+    required_footers=st.lists(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=3,
+            max_size=10,
+        ),
+        unique=True,
+    ),
+)
+def test_repr_config_hypothesis(
+    header,
+    body,
+    repair,
+    rewrap,
+    spell_check,
+    ignore_generated_commits,
+    generated_commits,
+    types,
+    scopes,
+    footers,
+    required_footers,
+):
+    """Should reproduce a config."""
+    ccr = pccc.ConventionalCommitRunner()
+    ccr.options.load([])
+    ccr.options.header_length = header
+    ccr.options.body_length = body
+    ccr.options.repair = repair
+    ccr.options.rewrap = rewrap
+    ccr.options.spell_check = spell_check
+    ccr.options.ignore_generated_commits = ignore_generated_commits
+    ccr.options.generated_commits = generated_commits
+    ccr.options.types = types
+    ccr.options.scopes = scopes
+    ccr.options.footers = footers
+    ccr.options.required_footers = required_footers
+
+    # Assert on the repr().
+    assert f"header_length={header}" in repr(ccr.options)
+    assert f"body_length={body}" in repr(ccr.options)
+    assert f"repair={repair}" in repr(ccr.options)
+    assert f"rewrap={rewrap}" in repr(ccr.options)
+    assert f"spell_check={spell_check}" in repr(ccr.options)
+    assert f"ignore_generated_commits={ignore_generated_commits}" in repr(ccr.options)
+    assert f"types={types}" in repr(ccr.options)
+
+
 @pytest.mark.parametrize(
     "fn, data",
     load_configuration_data(),
 )
 def test_str_repr_property(fn, data, fs):
-    """Test ``Config().__str__()`` and ``Config().__repr__()``.
+    """Should not change depending on source format.
 
     Test ``Config().__str__()`` and ``Config().__repr__()`` by writing
     and loading the fixture data created to each other using TOML,
-    JSON, TOML then JSON, and JSON then TOML.  twice and then
-    comparing both the strings written and the objects
+    JSON, TOML then JSON, and JSON then TOML and then comparing both
+    the strings written and the objects.
     """
     # Use the fixture's JSON to write a TOML file, then load the TOML
     # and write a second file.  Then, assert that the two ``Config()``
