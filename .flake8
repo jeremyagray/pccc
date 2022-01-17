@@ -1,0 +1,22 @@
+#***********************************************************************
+#
+# pccc, the Python Conventional Commit Checker.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+#
+#***********************************************************************
+
+[flake8]
+
+extend-ignore = E203, W503
+    __init__.py F401
+
+exclude =
+    .git,
+    .tox,
+    __pycache__,
+
+max-complexity = 20
+max-line-length = 95
