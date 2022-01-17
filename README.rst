@@ -34,10 +34,14 @@ generate those commits as conventional commits (preferable).
 Roadmap
 =======
 
-#. Implement complete interoperability with TOML and JSON for
+#. Implement complete interoperability with TOML, JSON, YAML, and BespON for
    configuration. (target: 0.5.0)
 
-   * ``Config().__str__()`` should output either format (finished: 0.4.3)
+   * ``Config().__str__()`` should output any format
+     * TOML (finished: 0.4.3)
+     * JSON (finished: 0.4.3)
+     * YAML
+     * BespON
    * streamline testing fixture data formats
 
 #. Finish body and breaking change wrapping. (target: 0.5.0)
@@ -77,8 +81,6 @@ Roadmap
 
 #. Feature freeze, strict semantic versioning, and finish alpha and
    beta. (from 0.7.0 onward; first stable will be at 1.0.0)
-
-#. Add YAML and BespON configuration file support. (target: after 1.0.0)
 
 #. Implement custom hooks for handling per-project footers. (target:
    2.0.0 or later)
