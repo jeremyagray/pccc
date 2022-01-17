@@ -1,46 +1,66 @@
 #***********************************************************************
 #
-# Makefile - chore makefile for pccc
+# pccc, the Python Conventional Commit Checker.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# pccc, the Python Conventional Commit Checker.
-# Copyright (C) 2020-2021 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
 #
 #***********************************************************************
 
-.PHONY : build clean dist commit lint pip upload upload-test test test-all
+python-modules = pccc tests
+python-files =
 
+.PHONY : test-all
 test-all:
-	pytest -vv --black --flake8 --pydocstyle --cov pccc --cov-report term --cov-report html
+	pytest -vv --cov pccc --cov tests --cov-report term --cov-report html
 
+.PHONY : build
 build :
 	cd docs && make html
 	pip install -q build
 	python -m build
 
+.PHONY : clean
 clean :
 	rm -rf build
 	rm -rf dist
 	rm -rf pccc.egg-info
 	cd docs && make clean
 
+.PHONY : dist
 dist : clean build
 
+.PHONY : commit
 commit :
 	pre-commit run --all-files
 
+.PHONY : lint
 lint :
-	pytest --lint-only --black --flake8 --pydocstyle
+	flake8 --exit-zero $(python-modules) $(python-files)
+	isort --check $(python-modules) $(python-files) || exit 0
+	black --check $(python-modules) $(python-files)
 
+.PHONY : lint-fix
+lint-fix :
+	isort $(python-modules) $(python-files)
+	black $(python-modules) $(python-files)
+
+.PHONY : pip
 pip :
 	pip install -r requirements.txt
 
-test:
-	pytest --cov pccc --cov-report term
+.PHONY : test
+test :
+	pytest
 
-upload:
+.PHONY : upload
+upload :
 	python3 -m twine upload --verbose dist/*
 
-upload-test:
+.PHONY : upload-test
+upload-test :
 	python3 -m twine upload --verbose --repository testpypi dist/*
+
+requirements.txt: poetry.lock
+	./freeze.sh > $(@)
