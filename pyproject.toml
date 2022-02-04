@@ -1,12 +1,20 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# ******************************************************************************
 #
 # pccc, the Python Conventional Commit Checker.
-# Copyright (C) 2020-2021 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+#
+# ******************************************************************************
 
 [build-system]
 
 # Setuptools.
-requires = ["setuptools", "wheel"]
+requires = [
+  "setuptools",
+  "wheel",
+]
 build-backend = "setuptools.build_meta"
 
 # Poetry.
@@ -51,45 +59,46 @@ repair = false
 ignore_generated_commits = true
 
 generated_commits = [
-'''^\(tag:\s+v\d+\.\d+\.\d\)\s+\d+\.\d+\.\d+$''',
-'''^Merge branch 'master' of.*$''',
+  '''^\(tag:\s+v\d+\.\d+\.\d\)\s+\d+\.\d+\.\d+$''',
+  '''^Merge branch 'master' of.*$''',
 ]
 
 types = [
-"build",
-"ci",
-"depends",
-"docs",
-"feat",
-"fix",
-"perf",
-"refactor",
-"release",
-"style",
-"test"
+  "build",
+  "ci",
+  "depends",
+  "docs",
+  "feat",
+  "fix",
+  "perf",
+  "refactor",
+  "release",
+  "style",
+  "test",
 ]
 
 scopes = [
-"config",
-"parser"
+  "config",
+  "parser",
 ]
 
 footers = [
-"signed-off-by"
+  "github-closes",
+  "signed-off-by",
 ]
 
 required_footers = [
-"signed-off-by"
+  "signed-off-by",
 ]
 
 [tool.poetry]
 
-authors = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
+authors = ["Jeremy A Gray <gray@flyquackswim.com>"]
 description = "pccc:  the Python Conventional Commit Checker"
 name = "pccc"
 version = "0.4.4"
 license = "GPL-3.0-or-later"
-maintainers = ["Jeremy A Gray <jeremy.a.gray@gmail.com>"]
+maintainers = ["Jeremy A Gray <gray@flyquackswim.com>"]
 readme = "README.rst"
 homepage = "https://github.com/jeremyagray/pccc"
 repository = "https://github.com/jeremyagray/pccc"
