@@ -1,7 +1,13 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# ******************************************************************************
 #
 # pccc, the Python Conventional Commit Checker.
-# Copyright (C) 2020-2021 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+#
+# ******************************************************************************
+
 """pccc parser functions and classes."""
 
 import copy
@@ -14,7 +20,6 @@ import textwrap
 
 import pyparsing as pp
 
-# from .config import get_configuration_options
 from .config import Config
 
 
@@ -367,7 +372,8 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         types = self.options.types
         scopes = self.options.scopes
-        footers = self.options.footers
+        breakers = ("BREAKING CHANGE", "BREAKING-CHANGE")
+        footers = list(self.options.footers) + list(breakers)
 
         def _header_handler(s, loc, tokens):
             """Find the length of the header."""
@@ -400,11 +406,14 @@ class ConventionalCommitRunner(ConventionalCommit):
         def _footer_handler(s, loc, tokens):
             """Build the footer dicts from field values."""
             for footer in tokens:
+                if footer[0].upper() in breakers:
+                    _breaking_handler(s, loc, tokens)
+                    continue
                 self.footers.append(
                     {
                         "token": footer[0].lower().capitalize(),
                         "separator": footer[1],
-                        "value": "\n".join(tokens[0][2]),
+                        "value": "\n".join(footer[2]),
                     }
                 )
 
@@ -467,24 +476,9 @@ class ConventionalCommitRunner(ConventionalCommit):
         )
 
         footer_sep = pp.Regex(r"(: | #)").setWhitespaceChars("	\n")
-        breaking_token = pp.oneOf(
-            ("BREAKING CHANGE", "BREAKING-CHANGE")
-        ).setResultsName("breaking-token", listAllMatches=True)
         footer_token = pp.oneOf(footers, caseless=True).setResultsName(
             "footer-token", listAllMatches=True
         )
-
-        breaking_value = (
-            pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
-            .setWhitespaceChars(" 	")
-            .setResultsName("breaking-value", listAllMatches=True)
-        )
-        breaking = (
-            pp.Group(breaking_token + footer_sep + breaking_value)
-            .setResultsName("breaking", listAllMatches=True)
-            .setParseAction(_breaking_handler)
-        )
-
         footer_value = (
             pp.Group(pp.OneOrMore(~eos + ~footer_token + pp.Regex(r".*")))
             .setWhitespaceChars(" 	")
@@ -496,18 +490,16 @@ class ConventionalCommitRunner(ConventionalCommit):
             .setParseAction(_footer_handler)
         )
 
-        footer_types = pp.Group(breaking ^ footer)
-
         line = pp.Regex(r".*")
         bnewline = pp.LineEnd()
         skip = bnewline + bnewline
-        par = pp.OneOrMore(~eos + ~footer_types + ~bnewline + line + bnewline)
+        par = pp.OneOrMore(~eos + ~footer + ~bnewline + line + bnewline)
         body = skip + pp.OneOrMore(
-            ~eos + ~footer_types + par + pp.Optional(bnewline)
+            ~eos + ~footer + par + pp.Optional(bnewline)
         ).setParseAction(_body_handler)
 
         commit_msg = (
-            header + pp.Optional(body) + pp.Optional(breaking) + pp.ZeroOrMore(footer)
+            header + pp.Optional(body) + pp.ZeroOrMore(footer)
         ).setResultsName("commit-msg", listAllMatches=True)
 
         commit_msg.parseString(self.cleaned)

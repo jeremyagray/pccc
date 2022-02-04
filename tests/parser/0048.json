@@ -1,0 +1,30 @@
+{
+  "raw": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes #1\n",
+  "parsed": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes #1\n",
+  "header": {
+    "type": "feat",
+    "scope": "parser",
+    "description": "add closing footer",
+    "length": 32
+  },
+  "body": {
+    "paragraphs": ["Add closing footer to allow github issue closing.\n"],
+    "longest": 49
+  },
+  "breaking": {
+    "flag": false,
+    "token": "",
+    "separator": "",
+    "value": ""
+  },
+  "footers": [
+    {
+      "token": "Github-closes",
+      "separator": ": ",
+      "value": "closes #1"
+    }
+  ],
+  "cleaned": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes #1\n",
+  "parseable": true,
+  "errors": []
+}
