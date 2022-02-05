@@ -2,9 +2,9 @@
 #
 # pccc, the Python Conventional Commit Checker.
 #
-# SPDX-License-Identifier: GPL-3.0-or-later
-#
 # Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # ******************************************************************************
 
@@ -96,7 +96,7 @@ required_footers = [
 authors = ["Jeremy A Gray <gray@flyquackswim.com>"]
 description = "pccc:  the Python Conventional Commit Checker"
 name = "pccc"
-version = "0.4.5"
+version = "0.4.6"
 license = "GPL-3.0-or-later"
 maintainers = ["Jeremy A Gray <gray@flyquackswim.com>"]
 readme = "README.rst"
