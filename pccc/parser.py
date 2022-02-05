@@ -21,6 +21,9 @@ import textwrap
 import pyparsing as pp
 
 from .config import Config
+from .exceptions import ClosesIssueParseException
+
+PYPARSING_DEBUG = False
 
 
 class ConventionalCommit:
@@ -68,6 +71,9 @@ class ConventionalCommit:
     footers : [dict]
         An array of footer dicts, which are identical to the breaking
         dicts, without a "flag" field.
+    closes_issues : iterable of dict
+        An array of dicts, containing the ``owner``, ``repo``, and
+        ``number`` keys, if available.
     exc : object
         ParseException raised during parsing, or ``None``.
     """
@@ -101,6 +107,7 @@ class ConventionalCommit:
             "value": "",
         }
         self.footers = []
+        self.closes_issues = []
         self.exc = None
 
     def __str__(self):
@@ -338,7 +345,7 @@ class ConventionalCommitRunner(ConventionalCommit):
             )
         )
 
-    def parse(self):
+    def parse(self):  # noqa: C901
         r"""Parse a conventional commit message.
 
         Parse a conventional commit message according to the
@@ -367,6 +374,17 @@ class ConventionalCommitRunner(ConventionalCommit):
             par :: ( line newline )+
             body :: skip par+
             commit-msg :: header body? breaking? footer*
+
+        BNF for Github commit comment issue closing syntax
+
+            closes-token :: 'github-closes'
+            closes-sep :: footer-sep
+            owner :: ^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$
+            repo :: ^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$
+            number :: [0-9]+
+            closes-value ::
+                ( ( close[ds] | fix(ed|es) | resolve[ds] )
+                  owner/repo#number )
         """
         pp.ParserElement.defaultWhitespaceChars = "\t"
 
@@ -403,12 +421,71 @@ class ConventionalCommitRunner(ConventionalCommit):
             self.breaking["separator"] = tokens[0][1]
             self.breaking["value"] = "\n".join(tokens[0][2])
 
+        def _closes_handler(s, loc, tokens):
+            """Parse the Github issue closing footers."""
+            # token = "github-closes"
+            # sep = ": "
+            keyword = pp.oneOf(
+                (
+                    "close",
+                    "closed",
+                    "closes",
+                    "fix",
+                    "fixed",
+                    "fixes",
+                    "resolve",
+                    "resolved",
+                    "resolves",
+                ),
+            ).setResultsName("keyword", listAllMatches=True)
+
+            owner = pp.Regex(
+                r"[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}"
+            ).setResultsName("owner", listAllMatches=True)
+
+            repo = pp.Regex(
+                r"[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}"
+            ).setResultsName("repo", listAllMatches=True)
+
+            number = pp.Regex(r"#[0-9]+").setResultsName(
+                "number",
+                listAllMatches=True,
+            )
+
+            issue = (
+                pp.Group(keyword + pp.Optional(owner + "/" + repo) + number)
+                .setResultsName("issue", listAllMatches=True)
+                .setDebug(flag=PYPARSING_DEBUG)
+            )
+
+            issues = pp.Group(
+                issue + pp.ZeroOrMore(pp.Suppress(", ") + issue) + pp.StringEnd()
+            ).setDebug(flag=PYPARSING_DEBUG)
+
+            try:
+                matches = issues.parseString(tokens[0][2][0], parseAll=True)
+            except (pp.ParseException) as error:
+                raise ClosesIssueParseException(
+                    error.line,
+                    error.args[1],
+                    error.args[2],
+                    tokens[0][2][0],
+                )
+
+            for match in matches[0]:
+                data = {}
+                for (k, v) in match.items():
+                    data[k] = v[0]
+                self.closes_issues.append(data)
+
         def _footer_handler(s, loc, tokens):
             """Build the footer dicts from field values."""
             for footer in tokens:
                 if footer[0].upper() in breakers:
                     _breaking_handler(s, loc, tokens)
                     continue
+                if footer[0].lower() == "github-closes":
+                    _closes_handler(s, loc, tokens)
                 self.footers.append(
                     {
                         "token": footer[0].lower().capitalize(),
@@ -554,11 +631,11 @@ def main(argv=None):
         runner.validate()
         runner.post_process()
         sys.exit(0)
-    except ValueError as error:
+    except (ValueError, ClosesIssueParseException) as error:
         print(error, file=sys.stderr)
         print(runner.raw, file=sys.stdout)
         sys.exit(1)
-    except pp.ParseException as error:
+    except (pp.ParseException) as error:
         print(
             f"parse error at {error.lineno}:{error.col}: {error.line}",
             file=sys.stderr,

@@ -1,5 +1,14 @@
-#!/usr/bin/env python
-"""Parser unit tests."""
+# ******************************************************************************
+#
+# pccc, the Python Conventional Commit Checker.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+#
+# ******************************************************************************
+
+"""pccc parser tests."""
 
 import io
 import json
@@ -68,6 +77,10 @@ def test_commits(obj):
         assert str(ccr) == obj[0]["parsed"]
         assert repr(ccr) == fr"ConventionalCommit(raw={ccr.raw})"
 
+        # Check closes issues.
+        if "closes_issues" in obj[0]:
+            assert ccr.closes_issues == obj[0]["closes_issues"]
+
         # Check header length.
         if obj[0]["header"]["length"] > 50:
             with pytest.raises(ValueError):
@@ -83,7 +96,7 @@ def test_commits(obj):
             assert ccr.validate_body_length() is True
 
     else:
-        with pytest.raises(pp.ParseException):
+        with pytest.raises(pp.ParseBaseException):
             ccr.parse()
 
 
@@ -121,13 +134,13 @@ def test_main_file(config, obj, fs, capsys):
             assert error.type == SystemExit
             assert error.value.code == 1
     else:
-        try:
+        if "generated" in obj[0] and obj[0]["generated"]:
             obj[0]["generated"]
             with pytest.raises(SystemExit) as error:
                 pccc.main([fn])
             assert error.type == SystemExit
             assert error.value.code == 0
-        except KeyError:
+        else:
             with pytest.raises(SystemExit) as error:
                 pccc.main([fn])
             capture = capsys.readouterr()

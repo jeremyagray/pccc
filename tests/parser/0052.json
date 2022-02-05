@@ -1,0 +1,44 @@
+{
+  "raw": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nBREAKING-CHANGE: This change breaks.\nGithub-closes: closes jeremyagray/pccc#1, closes jeremyagray/fqs-#17\n",
+  "parsed": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nBREAKING-CHANGE: This change breaks.\nGithub-closes: closes jeremyagray/pccc#1, closes jeremyagray/fqs#17\n",
+  "header": {
+    "type": "feat",
+    "scope": "parser",
+    "description": "add closing footer",
+    "length": 32
+  },
+  "body": {
+    "paragraphs": ["Add closing footer to allow github issue closing.\n"],
+    "longest": 49
+  },
+  "breaking": {
+    "flag": false,
+    "token": "BREAKING-CHANGE",
+    "separator": ": ",
+    "value": "This change breaks."
+  },
+  "footers": [
+    {
+      "token": "Github-closes",
+      "separator": ": ",
+      "value": "closes jeremyagray/pccc#1, closes jeremyagray/fqs#17"
+    }
+  ],
+  "closes_issues": [
+    {
+      "keyword": "closes",
+      "owner": "jeremyagray",
+      "repo": "pccc",
+      "number": "#1"
+    },
+    {
+      "keyword": "closes",
+      "owner": "jeremyagray",
+      "repo": "fqs",
+      "number": "#17"
+    }
+  ],
+  "cleaned": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nBREAKING-CHANGE: This change breaks.\nGithub-closes: closes jeremyagray/pccc#1, closes jeremyagray/fqs#17\n",
+  "parseable": false,
+  "errors": []
+}
