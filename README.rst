@@ -36,11 +36,6 @@ Parsing Grammar
 
 Github Closes Issue Syntax
 
-See:
-
-* https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue/
-* https://github.com/shinn/github-username-regex/
-
 * KEYWORD = '(close[ds]?|fix(?:es|ed)?|resolve[ds]?)'
 * OWNER = '^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$'
 * REPOSITORY = '^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$'
@@ -49,7 +44,12 @@ See:
 * Single issue in different repository:  KEYWORD OWNER/REPOSITORY ISSUE-NUMBER
 * Multiple issues: use full syntax for each issue
 
-The parser in ``pccc`` requires separating multiple issues on the ``Github-issues`` line with `, `.
+The parser in ``pccc`` requires separating multiple issues on the ``Github-issues`` line with ", ".
+
+See:
+
+#. https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue/
+#. https://github.com/shinn/github-username-regex/
 
 Roadmap
 =======
