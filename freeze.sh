@@ -11,6 +11,7 @@
 #***********************************************************************
 
 grep='/usr/bin/grep'
+pip='/home/gray/.virtualenvs/pccc/bin/pip'
 sed='/usr/bin/sed'
 
-pip freeze | ${sed} 's/ @ .*-\(.*\)\(-py[23]\|-cp39-cp39\|-cp36\|\.tar\).*$/==\1/' | ${grep} -v '\(poetry\|pccc\)'
+pip freeze | ${sed} 's/ @ .*-\(.*\)\(-py[23]\|-cp39-cp39\|-cp36\|\.tar\).*$/==\1/' | ${grep} -v '\(poetry\|pccc\|pkg-resources\)'
