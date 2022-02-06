@@ -13,10 +13,12 @@
 .tox
 __pycache__
 build
+commit
 dist
 docs/_build
 htmlcov
 
 # Generated files.
-tests/parser/*.raw
+README.html
 tests/config/*.toml
+tests/parser/*.raw
