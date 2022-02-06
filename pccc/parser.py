@@ -21,7 +21,9 @@ import textwrap
 import pyparsing as pp
 
 from .config import Config
+from .exceptions import BodyLengthError
 from .exceptions import ClosesIssueParseException
+from .exceptions import HeaderLengthError
 
 PYPARSING_DEBUG = False
 
@@ -266,14 +268,15 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         Raises
         ------
-        ValueError
+        HeaderLengthError
             Indicates the commit message header exceeds its configured
             length.
         """
         if self.header["length"] > self.options.header_length:
-            raise ValueError(
-                f"Commit header length ({self.header['length']}) exceeds"
-                f" the maximum length ({self.options.header_length})."
+            raise HeaderLengthError(
+                self.header["length"],
+                self.options.header_length,
+                self._stringify_header(),
             )
 
         return True
@@ -291,14 +294,16 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         Raises
         ------
-        ValueError
+        BodyLengthError
             Indicates the commit message body has a line that exceeds
             its configured maximum length.
         """
+        self.set_body_longest()
+
         if self.body["longest"] > self.options.body_length:
-            raise ValueError(
-                f"Commit body length ({self.body['longest']}) exceeds"
-                f" the maximum length ({self.options.body_length})."
+            raise BodyLengthError(
+                self.body["longest"],
+                self.options.body_length,
             )
 
         return True
@@ -317,33 +322,61 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         Raises
         ------
-        ValueError
-            Indicates the commit did not validate.
+        BodyLengthError
+            Indicates the commit body length did not validate.  Will
+            attempt to wrap the body and revalidate if
+            ``self.options.rewrap`` is ``True``.
+        HeaderLengthError
+            Indicates the commit header length did not validate.
         """
         try:
             self.validate_header_length()
-            # self.validate_body_length()
+            self.validate_body_length()
 
             return True
-        except ValueError:
+
+        except HeaderLengthError:
+            raise
+
+        except BodyLengthError:
+            if self.options.rewrap:
+                self.wrap()
+                self.validate_body_length()
+                return True
+
             raise
 
     def post_process(self):
         """Process commit after parsing."""
-        # if ((self.options.wrap
-        #      and not self.check_body_length())
-        #     or self.options.rewrap):
-        #     self.wrap()
-        self.wrap()
+        if self.options.rewrap:
+            self.wrap()
+
+    def set_body_longest(self):
+        """Calculate the length of the longest body line."""
+        length = 0
+        for par in self.body["paragraphs"]:
+            for line in par.split("\n"):
+                if len(line) > length:
+                    length = len(line)
+
+        self.body["longest"] = length
+        return self
 
     def wrap(self):
         """Wrap a commit body to a given length."""
         self.body["paragraphs"] = list(
             map(
-                lambda item: "\n".join(textwrap.wrap(item, self.options.body_length)),
+                lambda item: "\n".join(
+                    textwrap.wrap(" ".join(item.split("\n")), self.options.body_length)
+                )
+                + "\n",
                 self.body["paragraphs"],
             )
         )
+
+        self.set_body_longest()
+
+        return self
 
     def parse(self):  # noqa: C901
         r"""Parse a conventional commit message.
@@ -356,16 +389,13 @@ class ConventionalCommitRunner(ConventionalCommit):
         BNF for conventional commit (v1.0.0)::
 
             type :: ( feat | fix | 'user defined types' )
-            scope :: ( '(' 'user defined scopes' ')' )
+            scope :: '(' ( 'user defined scopes' ) ')'
             header-breaking-flag :: !
             header-sep :: ': '
             header-desc :: .*
             header :: type scope? header-breaking-flag? header-sep header-desc
-            breaking-token :: ( BREAKING CHANGE | BREAKING-CHANGE )
+            footer-token :: ( 'user defined footers' | BREAKING CHANGE | BREAKING-CHANGE )
             footer-sep :: ( ': ' | ' #' )
-            breaking-value :: .*
-            breaking :: breaking-token footer-sep breaking-value
-            footer-token :: ( 'user defined footers' )
             footer-value :: .*
             footer :: footer-token footer-sep footer-value
             line :: .*
@@ -373,14 +403,14 @@ class ConventionalCommitRunner(ConventionalCommit):
             skip :: newline newline
             par :: ( line newline )+
             body :: skip par+
-            commit-msg :: header body? breaking? footer*
+            commit-msg :: header body? footer*
 
-        BNF for Github commit comment issue closing syntax
+        BNF for Github commit comment issue closing syntax::
 
             closes-token :: 'github-closes'
             closes-sep :: footer-sep
-            owner :: ^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$
-            repo :: ^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}$
+            owner :: [a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}
+            repo :: [a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}
             number :: [0-9]+
             closes-value ::
                 ( ( close[ds] | fix(ed|es) | resolve[ds] )

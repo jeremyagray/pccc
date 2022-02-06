@@ -29,6 +29,9 @@ Examples
 >>> ccr.parse()
 """
 from .config import Config
+from .exceptions import BodyLengthError
+from .exceptions import ClosesIssueParseException
+from .exceptions import HeaderLengthError
 from .exceptions import NotParseableError
 from .parser import ConventionalCommit
 from .parser import ConventionalCommitRunner

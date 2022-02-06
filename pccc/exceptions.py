@@ -26,9 +26,12 @@ class NotParseableError(Exception):
 class ClosesIssueParseException(ParseFatalException):
     """Github closes issue string not parseable."""
 
-    def __init__(self, s, loc, message, string):
+    def __init__(self, line, loc, message, string):
         """Initialize a ``ClosesIssueParseException``."""
-        super().__init__(s, loc, message)
+        super().__init__(line, loc, message)
+        self.line = line
+        self.loc = loc
+        self.message = message
         self.string = string
 
     def __str__(self):
@@ -50,9 +53,71 @@ class ClosesIssueParseException(ParseFatalException):
         """Reproduce a ``ClosesIssueParseException``."""
         return (
             "ClosesIssueParseException("
-            f"s={repr(self.s)},"
+            f"line={repr(self.line)},"
             f" loc={repr(self.loc)},"
             f" message={repr(self.message)},"
             f" string={repr(self.string)},"
+            ")"
+        )
+
+
+class HeaderLengthError(ValueError):
+    """Header length error."""
+
+    def __init__(self, length, max_length, header):
+        """Initialize a ``HeaderLengthError``."""
+        message = (
+            f"Commit header length ({length}) exceeds"
+            f" the maximum length ({max_length})."
+        )
+
+        super().__init__(message)
+        self.length = length
+        self.max_length = max_length
+        self.header = header
+        self.message = message
+
+    def __str__(self):
+        """Stringify a ``HeaderLengthError``."""
+        return self.message
+
+    def __repr__(self):
+        """Reproduce a ``HeaderLengthError``."""
+        return (
+            "HeaderLengthError("
+            f"length={repr(self.length)},"
+            f" max_length={repr(self.max_length)},"
+            f" header={repr(self.header)},"
+            f" message={repr(self.message)},"
+            ")"
+        )
+
+
+class BodyLengthError(ValueError):
+    """Body length error."""
+
+    def __init__(self, longest, max_length):
+        """Initialize a ``BodyLengthError``."""
+        message = (
+            f"Commit body length ({longest}) exceeds"
+            f" the maximum length ({max_length})."
+        )
+
+        super().__init__(message)
+        self.longest = longest
+        self.max_length = max_length
+        self.message = message
+
+    def __str__(self):
+        """Stringify a ``BodyLengthError``."""
+        return self.message
+
+    def __repr__(self):
+        """Reproduce a ``BodyLengthError``."""
+        return (
+            "BodyLengthError("
+            f"longest={repr(self.longest)},"
+            f" max_length={repr(self.max_length)},"
+            f" message={repr(self.message)},"
             ")"
         )

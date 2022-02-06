@@ -14,6 +14,20 @@
     ],
     "longest": 219
   },
+  "70": {
+    "paragraphs": [
+      "Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug. Fix big parser bug. Fix big parser bug. Fix big parser\nbug. Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix\nbig parser bug.\n",
+      "Also, format your code with black or black, whichever you prefer.\n"
+    ],
+    "longest": 68
+  },
+  "72": {
+    "paragraphs": [
+      "Fix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug. Fix big parser bug. Fix big parser bug. Fix big parser bug.\nFix big parser bug. Fix big parser bug. Fix big parser bug. Fix big\nparser bug.\n",
+      "Also, format your code with black or black, whichever you prefer.\n"
+    ],
+    "longest": 71
+  },
   "breaking": {
     "flag": true,
     "token": "BREAKING CHANGE",

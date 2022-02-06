@@ -70,7 +70,6 @@ def test_commits(obj):
         ccr.parse()
 
         assert ccr.header == obj[0]["header"]
-        assert ccr.body == obj[0]["body"]
         assert ccr.breaking == obj[0]["breaking"]
         assert ccr.footers == obj[0]["footers"]
 
@@ -88,12 +87,24 @@ def test_commits(obj):
         else:
             assert ccr.validate_header_length() is True
 
-        # Check body length.
+        # Check body.
+        ccr.options.rewrap = False
         if obj[0]["body"]["longest"] > 72:
-            with pytest.raises(ValueError):
-                ccr.validate_body_length()
+            with pytest.raises(pccc.BodyLengthError):
+                ccr.validate()
         else:
+            assert ccr.body == obj[0]["body"]
             assert ccr.validate_body_length() is True
+
+        ccr.options.rewrap = True
+        for length in (72, 70):
+            if str(length) in obj[0]:
+                print(length)
+                ccr.options.body_length = length
+                assert ccr.validate() is True
+                print(ccr.body)
+                print(obj[0][str(length)])
+                assert ccr.body == obj[0][str(length)]
 
     else:
         with pytest.raises(pp.ParseBaseException):
