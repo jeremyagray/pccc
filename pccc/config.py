@@ -1,7 +1,13 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# ******************************************************************************
 #
 # pccc, the Python Conventional Commit Checker.
-# Copyright (C) 2020-2021 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+#
+# ******************************************************************************
+
 """pccc configuration functions."""
 
 import argparse
@@ -24,37 +30,37 @@ class Config:
 
     Attributes
     ----------
-    commit : string
-        Commit message location; default is ``STDIN``.
-    config_file : string
-        Configuration file path; default is ``pyproject.toml``.
-    header_length : int
-       Maximum header length; default is 50.
-    body_length : int
-       Maximum body line length; default is 72.
-    repair : boolean
-        Repair commit, implying spell check and rewrap; default is
-        ``False``.
-    wrap : boolean
-        Wrap body; default is ``False``.
-    spell_check : boolean
-        Spell check header and body; default is ``False``.
-    ignore_generated_commits : boolean
+    commit : string, default="STDIN"
+        Commit message location.
+    config_file : string, default="pyproject.toml"
+        Configuration file path.
+    header_length : int, default=50
+       Maximum header length.
+    body_length : int, default=72
+       Maximum body line length.
+    repair : boolean, default=False
+        Repair commit, implying spell check and wrap.
+    wrap : boolean, default=False
+        Wrap body and breaking change, if necessary.
+    force_wrap : boolean, default=False
+        Force wrap body and breaking change, regardless of length.
+    spell_check : boolean, default=False
+        Spell check commit message.
+    ignore_generated_commits : boolean, default=False
         Ignore generated commits which match ``generated_commits``
-        regular expressions; default is ``False``.
-    generated_commits : [string]
-        List of generated commits, as Python regular expressions;
-        default is ``[]``.  For TOML files, it's probably best to use
-        the multiline single quote strings to reduce escaping
-        problems.
-    types : [string]
-        List of header types; default is ``['feat', 'fix']``.
-    scopes : [string]
-        List of header scopes; default is ``[]``.
-    footers : [string]
-        List of footers; default is ``[]``.
-    required_footers : [string]
-        List of required footers; default is ``[]``.
+        regular expressions.
+    generated_commits : iterable of string, default=[]
+        List of generated commits, as Python regular expressions.  For
+        TOML files, it's probably best to use the multiline single
+        quote strings to reduce escaping problems.
+    types : iterable of string, default=["feat", "fix"]
+        List of header types.
+    scopes : iterable of string, default=[]
+        List of header scopes.
+    footers : iterable of string, default=[]
+        List of footers.
+    required_footers : iterable of string, default=[]
+        List of required footers.
     """
 
     def __init__(
@@ -65,6 +71,7 @@ class Config:
         body_length=72,
         repair=False,
         wrap=False,
+        force_wrap=False,
         spell_check=False,
         ignore_generated_commits=False,
         generated_commits=[],
@@ -89,6 +96,7 @@ class Config:
         self.body_length = body_length
         self.repair = repair
         self.wrap = wrap
+        self.force_wrap = force_wrap
         self.spell_check = spell_check
         self.ignore_generated_commits = ignore_generated_commits
         self.generated_commits = generated_commits
@@ -137,6 +145,7 @@ class Config:
             f"body_length={self.body_length}, "
             f"repair={self.repair}, "
             f"wrap={self.wrap}, "
+            f"force_wrap={self.force_wrap}, "
             f"spell_check={self.spell_check}, "
             f"ignore_generated_commits={self.ignore_generated_commits}, "
             f"generated_commits={self.generated_commits}, "
@@ -178,6 +187,7 @@ class Config:
             "body_length": self.body_length,
             "repair": self.repair,
             "wrap": self.wrap,
+            "force_wrap": self.force_wrap,
             "spell_check": self.spell_check,
             "ignore_generated_commits": self.ignore_generated_commits,
             "generated_commits": self.generated_commits,
@@ -401,6 +411,7 @@ def _load_json_file(filename="./package.json"):
         "spell_check": None,
         "ignore_generated_commits": None,
         "wrap": None,
+        "force_wrap": None,
         "repair": None,
         "types": None,
         "scopes": None,
@@ -466,6 +477,7 @@ def _load_toml_file(filename="./pyproject.toml"):
         "body_length": None,
         "spell_check": None,
         "wrap": None,
+        "force_wrap": None,
         "repair": None,
         "types": None,
         "scopes": None,
@@ -590,8 +602,7 @@ to redistribute it under certain conditions; type ``pccc
         dest="wrap",
         default=None,
         action="store_true",
-        help="Wrap the body commit, regardless of line length."
-        "  Default is no wrapping.",
+        help="Wrap the body commit, if necessary." "  Default is no wrapping.",
     )
     wrap_group.add_argument(
         "-W",
@@ -599,8 +610,26 @@ to redistribute it under certain conditions; type ``pccc
         dest="wrap",
         default=None,
         action="store_false",
-        help="Do not wrap the body commit, regardless of line length."
-        "  Default is no wrapping.",
+        help="Do not wrap the body commit." "  Default is no wrapping.",
+    )
+
+    force_wrap_group = parser.add_mutually_exclusive_group()
+    force_wrap_group.add_argument(
+        "-z",
+        "--force-wrap",
+        dest="force_wrap",
+        default=None,
+        action="store_true",
+        help="Wrap the body commit, regardless of line length."
+        "  Default is no force wrapping.",
+    )
+    force_wrap_group.add_argument(
+        "-Z",
+        "--no-force-wrap",
+        dest="force_wrap",
+        default=None,
+        action="store_false",
+        help="Do not wrap the body commit." "  Default is no force wrapping.",
     )
 
     repair_group = parser.add_mutually_exclusive_group()

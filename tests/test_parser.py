@@ -89,6 +89,7 @@ def test_commits(obj):
 
         # Check body.
         ccr.options.wrap = False
+        ccr.options.force_wrap = False
         if obj[0]["body"]["longest"] > 72:
             with pytest.raises(pccc.BodyLengthError):
                 ccr.validate()
@@ -102,6 +103,27 @@ def test_commits(obj):
                 print(length)
                 ccr.options.body_length = length
                 assert ccr.validate() is True
+                print(ccr.body)
+                print(obj[0][str(length)])
+                assert ccr.body == obj[0][str(length)]
+
+        ccr.options.force_wrap = True
+        for length in (72, 70):
+            if str(length) in obj[0]:
+                print(length)
+                ccr.options.body_length = length
+                assert ccr.validate() is True
+                ccr.post_process()
+                print(ccr.body)
+                print(obj[0][str(length)])
+                assert ccr.body == obj[0][str(length)]
+
+        for length in (70, 72):
+            if str(length) in obj[0]:
+                print(length)
+                ccr.options.body_length = length
+                assert ccr.validate() is True
+                ccr.post_process()
                 print(ccr.body)
                 print(obj[0][str(length)])
                 assert ccr.body == obj[0][str(length)]

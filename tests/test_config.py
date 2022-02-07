@@ -49,6 +49,7 @@ def tomlify_list(list):
     body=st.integers(min_value=70, max_value=120),
     repair=st.booleans(),
     wrap=st.booleans(),
+    force_wrap=st.booleans(),
     spell_check=st.booleans(),
     ignore_generated_commits=st.booleans(),
     generated_commits=st.lists(
@@ -112,6 +113,7 @@ def test_str_config_hypothesis(
     body,
     repair,
     wrap,
+    force_wrap,
     spell_check,
     ignore_generated_commits,
     generated_commits,
@@ -127,6 +129,7 @@ def test_str_config_hypothesis(
     ccr.options.body_length = body
     ccr.options.repair = repair
     ccr.options.wrap = wrap
+    ccr.options.force_wrap = force_wrap
     ccr.options.spell_check = spell_check
     ccr.options.ignore_generated_commits = ignore_generated_commits
     ccr.options.generated_commits = generated_commits
@@ -140,6 +143,7 @@ def test_str_config_hypothesis(
     assert f"body_length = {body}" in str(ccr.options)
     assert f"repair = {str(repair).lower()}" in str(ccr.options)
     assert f"wrap = {str(wrap).lower()}" in str(ccr.options)
+    assert f"force_wrap = {str(force_wrap).lower()}" in str(ccr.options)
     assert f"spell_check = {str(spell_check).lower()}" in str(ccr.options)
     assert f"ignore_generated_commits = {str(ignore_generated_commits).lower()}" in str(
         ccr.options
@@ -152,6 +156,7 @@ def test_str_config_hypothesis(
     assert f'"body_length": {body}' in str(ccr.options)
     assert f'"repair": {str(repair).lower()}' in str(ccr.options)
     assert f'"wrap": {str(wrap).lower()}' in str(ccr.options)
+    assert f'"force_wrap": {str(force_wrap).lower()}' in str(ccr.options)
     assert f'"spell_check": {str(spell_check).lower()}' in str(ccr.options)
     assert (
         f'"ignore_generated_commits": {str(ignore_generated_commits).lower()}'
@@ -164,6 +169,7 @@ def test_str_config_hypothesis(
     body=st.integers(min_value=70, max_value=120),
     repair=st.booleans(),
     wrap=st.booleans(),
+    force_wrap=st.booleans(),
     spell_check=st.booleans(),
     ignore_generated_commits=st.booleans(),
     generated_commits=st.lists(
@@ -227,6 +233,7 @@ def test_repr_config_hypothesis(
     body,
     repair,
     wrap,
+    force_wrap,
     spell_check,
     ignore_generated_commits,
     generated_commits,
@@ -242,6 +249,7 @@ def test_repr_config_hypothesis(
     ccr.options.body_length = body
     ccr.options.repair = repair
     ccr.options.wrap = wrap
+    ccr.options.force_wrap = force_wrap
     ccr.options.spell_check = spell_check
     ccr.options.ignore_generated_commits = ignore_generated_commits
     ccr.options.generated_commits = generated_commits
@@ -255,6 +263,7 @@ def test_repr_config_hypothesis(
     assert f"body_length={body}" in repr(ccr.options)
     assert f"repair={repair}" in repr(ccr.options)
     assert f"wrap={wrap}" in repr(ccr.options)
+    assert f"force_wrap={force_wrap}" in repr(ccr.options)
     assert f"spell_check={spell_check}" in repr(ccr.options)
     assert f"ignore_generated_commits={ignore_generated_commits}" in repr(ccr.options)
     assert f"types={types}" in repr(ccr.options)
@@ -477,6 +486,10 @@ def test_repr(fn, data, fs):
         assert re.search(fr"\s+repair={ccr.options.repair},\s+", actual["string"])
         # repr contains correct wrap setting.
         assert re.search(fr"\s+wrap={ccr.options.wrap},\s+", actual["string"])
+        # repr contains correct force_wrap setting.
+        assert re.search(
+            fr"\s+force_wrap={ccr.options.force_wrap},\s+", actual["string"]
+        )
         # repr contains correct spell check setting.
         assert re.search(
             fr"\s+spell_check={ccr.options.spell_check},\s+", actual["string"]

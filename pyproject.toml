@@ -54,6 +54,7 @@ use_parentheses = true
 header_length = 50
 body_length = 72
 wrap = true
+force_wrap = true
 spell_check = false
 repair = false
 ignore_generated_commits = true

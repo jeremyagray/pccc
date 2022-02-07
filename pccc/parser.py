@@ -325,7 +325,8 @@ class ConventionalCommitRunner(ConventionalCommit):
         BodyLengthError
             Indicates the commit body length did not validate.  Will
             attempt to wrap the body and revalidate if
-            ``self.options.wrap`` is ``True``.
+            ``self.options.wrap`` or ``self.options.force_wrap`` is
+            ``True``.
         HeaderLengthError
             Indicates the commit header length did not validate.
         """
@@ -339,7 +340,7 @@ class ConventionalCommitRunner(ConventionalCommit):
             raise
 
         except BodyLengthError:
-            if self.options.wrap:
+            if self.options.wrap or self.options.force_wrap:
                 self.wrap()
                 self.validate_body_length()
                 return True
@@ -348,7 +349,7 @@ class ConventionalCommitRunner(ConventionalCommit):
 
     def post_process(self):
         """Process commit after parsing."""
-        if self.options.wrap:
+        if self.options.force_wrap:
             self.wrap()
 
     def set_body_longest(self):
