@@ -35,8 +35,8 @@ class Config:
     repair : boolean
         Repair commit, implying spell check and rewrap; default is
         ``False``.
-    rewrap : boolean
-        Rewrap body; default is ``False``.
+    wrap : boolean
+        Wrap body; default is ``False``.
     spell_check : boolean
         Spell check header and body; default is ``False``.
     ignore_generated_commits : boolean
@@ -64,7 +64,7 @@ class Config:
         header_length=50,
         body_length=72,
         repair=False,
-        rewrap=False,
+        wrap=False,
         spell_check=False,
         ignore_generated_commits=False,
         generated_commits=[],
@@ -88,7 +88,7 @@ class Config:
         self.header_length = header_length
         self.body_length = body_length
         self.repair = repair
-        self.rewrap = rewrap
+        self.wrap = wrap
         self.spell_check = spell_check
         self.ignore_generated_commits = ignore_generated_commits
         self.generated_commits = generated_commits
@@ -136,7 +136,7 @@ class Config:
             f"header_length={self.header_length}, "
             f"body_length={self.body_length}, "
             f"repair={self.repair}, "
-            f"rewrap={self.rewrap}, "
+            f"wrap={self.wrap}, "
             f"spell_check={self.spell_check}, "
             f"ignore_generated_commits={self.ignore_generated_commits}, "
             f"generated_commits={self.generated_commits}, "
@@ -177,7 +177,7 @@ class Config:
             "header_length": self.header_length,
             "body_length": self.body_length,
             "repair": self.repair,
-            "rewrap": self.rewrap,
+            "wrap": self.wrap,
             "spell_check": self.spell_check,
             "ignore_generated_commits": self.ignore_generated_commits,
             "generated_commits": self.generated_commits,
@@ -400,7 +400,7 @@ def _load_json_file(filename="./package.json"):
         "body_length": None,
         "spell_check": None,
         "ignore_generated_commits": None,
-        "rewrap": None,
+        "wrap": None,
         "repair": None,
         "types": None,
         "scopes": None,
@@ -465,7 +465,7 @@ def _load_toml_file(filename="./pyproject.toml"):
         "header_length": None,
         "body_length": None,
         "spell_check": None,
-        "rewrap": None,
+        "wrap": None,
         "repair": None,
         "types": None,
         "scopes": None,
@@ -583,24 +583,24 @@ to redistribute it under certain conditions; type ``pccc
         " ``generated_commits``.  Default is to check every commit.",
     )
 
-    rewrap_group = parser.add_mutually_exclusive_group()
-    rewrap_group.add_argument(
+    wrap_group = parser.add_mutually_exclusive_group()
+    wrap_group.add_argument(
         "-w",
-        "--rewrap",
-        dest="rewrap",
+        "--wrap",
+        dest="wrap",
         default=None,
         action="store_true",
-        help="Rewrap the body commit, regardless of line length."
-        "  Default is no rewrapping.",
+        help="Wrap the body commit, regardless of line length."
+        "  Default is no wrapping.",
     )
-    rewrap_group.add_argument(
+    wrap_group.add_argument(
         "-W",
-        "--no-rewrap",
-        dest="rewrap",
+        "--no-wrap",
+        dest="wrap",
         default=None,
         action="store_false",
-        help="Do not rewrap the body commit, regardless of line length."
-        "  Default is no rewrapping.",
+        help="Do not wrap the body commit, regardless of line length."
+        "  Default is no wrapping.",
     )
 
     repair_group = parser.add_mutually_exclusive_group()
@@ -610,7 +610,7 @@ to redistribute it under certain conditions; type ``pccc
         dest="repair",
         default=None,
         action="store_true",
-        help="Repair the body commit as necessary; implies spell check and rewrap."
+        help="Repair the body commit as necessary; implies spell check and wrap."
         "  Default is false.",
     )
     repair_group.add_argument(
@@ -620,7 +620,7 @@ to redistribute it under certain conditions; type ``pccc
         default=None,
         action="store_false",
         help="Do not repair the body commit; implies no spell check and no"
-        " rewrap.  Default is false.",
+        " wrap.  Default is false.",
     )
 
     parser.add_argument(
