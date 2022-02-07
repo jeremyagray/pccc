@@ -13,7 +13,8 @@
     "flag": true,
     "token": "BREAKING-CHANGE",
     "separator": " #",
-    "value": "This breaks the old grammar."
+    "value": "This breaks the old grammar.",
+    "longest": 45
   },
   "footers": [],
   "raw": "fix(parser)!: fix parser bug\n\nBREAKING-CHANGE #This breaks the old grammar.\n",

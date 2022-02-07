@@ -121,3 +121,33 @@ class BodyLengthError(ValueError):
             f" message={repr(self.message)},"
             ")"
         )
+
+
+class BreakingLengthError(ValueError):
+    """Breaking change description length error."""
+
+    def __init__(self, longest, max_length):
+        """Initialize a ``BreakingLengthError``."""
+        message = (
+            f"Commit breaking change length ({longest}) exceeds"
+            f" the maximum length ({max_length})."
+        )
+
+        super().__init__(message)
+        self.longest = longest
+        self.max_length = max_length
+        self.message = message
+
+    def __str__(self):
+        """Stringify a ``BreakingLengthError``."""
+        return self.message
+
+    def __repr__(self):
+        """Reproduce a ``BreakingLengthError``."""
+        return (
+            "BreakingLengthError("
+            f"longest={repr(self.longest)},"
+            f" max_length={repr(self.max_length)},"
+            f" message={repr(self.message)},"
+            ")"
+        )

@@ -15,7 +15,8 @@
     "flag": true,
     "token": "",
     "separator": "",
-    "value": ""
+    "value": "",
+    "longest": 0
   },
   "footers": [],
   "cleaned": "fix(parser)!: fix parser bug\n",

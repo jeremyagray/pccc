@@ -15,7 +15,8 @@
     "flag": false,
     "token": "",
     "separator": "",
-    "value": ""
+    "value": "",
+    "longest": 0
   },
   "footers": [
     {

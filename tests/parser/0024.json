@@ -16,7 +16,8 @@
     "flag": true,
     "token": "BREAKING CHANGE",
     "separator": ": ",
-    "value": "This breaks the old grammar."
+    "value": "This breaks the old grammar.",
+    "longest": 45
   },
   "footers": [
     {

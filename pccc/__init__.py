@@ -30,6 +30,7 @@ Examples
 """
 from .config import Config
 from .exceptions import BodyLengthError
+from .exceptions import BreakingLengthError
 from .exceptions import ClosesIssueParseException
 from .exceptions import HeaderLengthError
 from .exceptions import NotParseableError

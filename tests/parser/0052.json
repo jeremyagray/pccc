@@ -15,7 +15,8 @@
     "flag": false,
     "token": "BREAKING-CHANGE",
     "separator": ": ",
-    "value": "This change breaks."
+    "value": "This change breaks.",
+    "longest": 36
   },
   "footers": [
     {

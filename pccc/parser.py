@@ -22,6 +22,7 @@ import pyparsing as pp
 
 from .config import Config
 from .exceptions import BodyLengthError
+from .exceptions import BreakingLengthError
 from .exceptions import ClosesIssueParseException
 from .exceptions import HeaderLengthError
 
@@ -107,6 +108,7 @@ class ConventionalCommit:
             "token": "",
             "separator": "",
             "value": "",
+            "longest": 0,
         }
         self.footers = []
         self.closes_issues = []
@@ -308,6 +310,33 @@ class ConventionalCommitRunner(ConventionalCommit):
 
         return True
 
+    def validate_breaking_length(self):
+        """Check that maximum breaking change length is correct.
+
+        Check that the maximum breaking change line length is less
+        than or equal to ``self.options.body_length``.
+
+        Returns
+        -------
+        boolean
+            True, if the breaking change length validates.
+
+        Raises
+        ------
+        BodyLengthError
+            Indicates the commit message breaking change has a line
+            that exceeds its configured maximum length.
+        """
+        self.set_breaking_longest()
+
+        if self.breaking["longest"] > self.options.body_length:
+            raise BreakingLengthError(
+                self.breaking["longest"],
+                self.options.body_length,
+            )
+
+        return True
+
     def validate(self):
         """Validate a commit after parsing.
 
@@ -332,25 +361,34 @@ class ConventionalCommitRunner(ConventionalCommit):
         """
         try:
             self.validate_header_length()
-            self.validate_body_length()
-
-            return True
-
         except HeaderLengthError:
             raise
 
+        try:
+            self.validate_body_length()
         except BodyLengthError:
             if self.options.wrap or self.options.force_wrap:
                 self.wrap()
                 self.validate_body_length()
-                return True
+            else:
+                raise
 
-            raise
+        try:
+            self.validate_breaking_length()
+        except BreakingLengthError:
+            if self.options.wrap or self.options.force_wrap:
+                self.wrap(part="breaking")
+                self.validate_breaking_length()
+            else:
+                raise
+
+        return True
 
     def post_process(self):
         """Process commit after parsing."""
         if self.options.force_wrap:
             self.wrap()
+            self.wrap(part="breaking")
 
     def set_body_longest(self):
         """Calculate the length of the longest body line."""
@@ -363,19 +401,48 @@ class ConventionalCommitRunner(ConventionalCommit):
         self.body["longest"] = length
         return self
 
-    def wrap(self):
-        """Wrap a commit body to a given length."""
-        self.body["paragraphs"] = list(
-            map(
-                lambda item: "\n".join(
-                    textwrap.wrap(" ".join(item.split("\n")), self.options.body_length)
-                )
-                + "\n",
-                self.body["paragraphs"],
-            )
-        )
+    def set_breaking_longest(self):
+        """Calculate the length of the longest breaking change line."""
+        length = 0
+        breaking = self._stringify_breaking()
 
-        self.set_body_longest()
+        for line in breaking.split("\n"):
+            if len(line) > length:
+                length = len(line)
+
+        self.breaking["longest"] = length
+
+        return self
+
+    def wrap(self, part="body"):
+        """Wrap a commit body to a given length."""
+        if part == "body":
+            self.body["paragraphs"] = list(
+                map(
+                    lambda item: "\n".join(
+                        textwrap.wrap(
+                            " ".join(item.split("\n")), self.options.body_length
+                        )
+                    )
+                    + "\n",
+                    self.body["paragraphs"],
+                )
+            )
+
+            self.set_body_longest()
+
+        elif part == "breaking":
+            commit = (
+                self.breaking["token"]
+                + self.breaking["separator"]
+                + self.breaking["value"]
+            )
+            commit = textwrap.fill(commit, self.options.body_length)
+            commit = commit.removeprefix(
+                self.breaking["token"] + self.breaking["separator"],
+            )
+            self.breaking["value"] = commit
+            self.set_breaking_longest()
 
         return self
 

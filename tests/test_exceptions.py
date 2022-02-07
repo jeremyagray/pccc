@@ -152,3 +152,43 @@ def test_reproduce_body_length_error(length, max):
         f" message={repr(message)},"
         ")"
     )
+
+
+@given(
+    length=st.integers(min_value=80, max_value=120),
+    max=st.integers(min_value=70, max_value=78),
+)
+def test_stringify_breaking_length_error(length, max):
+    """Should stringify a ``pccc.BreakingLengthError()``."""
+    error = pccc.BreakingLengthError(
+        length,
+        max,
+    )
+
+    assert str(error) == (
+        f"Commit breaking change length ({length}) exceeds the maximum length ({max})."
+    )
+
+
+@given(
+    length=st.integers(min_value=80, max_value=120),
+    max=st.integers(min_value=70, max_value=78),
+)
+def test_reproduce_breaking_length_error(length, max):
+    """Should reproduce a ``pccc.BreakingLengthError()``."""
+    error = pccc.BreakingLengthError(
+        length,
+        max,
+    )
+
+    message = (
+        f"Commit breaking change length ({length}) exceeds the maximum length ({max})."
+    )
+
+    assert repr(error) == (
+        "BreakingLengthError("
+        f"longest={repr(length)},"
+        f" max_length={repr(max)},"
+        f" message={repr(message)},"
+        ")"
+    )
