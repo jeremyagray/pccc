@@ -44,229 +44,126 @@ def tomlify_list(list):
         return "[]"
 
 
-@given(
-    header=st.integers(min_value=50, max_value=50),
-    body=st.integers(min_value=70, max_value=120),
-    repair=st.booleans(),
-    wrap=st.booleans(),
-    force_wrap=st.booleans(),
-    spell_check=st.booleans(),
-    ignore_generated_commits=st.booleans(),
-    generated_commits=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N", "P"),
-                blacklist_categories=("C"),
+@st.composite
+def configuration(draw):
+    """Generate a configuration object strategy."""
+    footers = draw(
+        st.lists(
+            st.text(
+                st.characters(
+                    whitelist_categories=("L", "N"),
+                    blacklist_categories=("C"),
+                ),
+                min_size=3,
+                max_size=10,
             ),
-            min_size=3,
-            max_size=10,
+            unique=True,
+        )
+    )
+
+    return pccc.Config(
+        header_length=draw(st.integers(min_value=50, max_value=50)),
+        body_length=draw(st.integers(min_value=70, max_value=120)),
+        repair=draw(st.booleans()),
+        wrap=draw(st.booleans()),
+        force_wrap=draw(st.booleans()),
+        spell_check=draw(st.booleans()),
+        ignore_generated_commits=draw(st.booleans()),
+        generated_commits=draw(
+            st.lists(
+                st.text(
+                    st.characters(
+                        whitelist_categories=("L", "N", "P"),
+                        blacklist_categories=("C"),
+                    ),
+                    min_size=3,
+                    max_size=10,
+                ),
+                unique=True,
+            )
         ),
-        unique=True,
-    ),
-    types=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
+        types=draw(
+            st.lists(
+                st.text(
+                    st.characters(
+                        whitelist_categories=("L", "N"),
+                        blacklist_categories=("C"),
+                    ),
+                    min_size=3,
+                    max_size=10,
+                ),
+                unique=True,
+            )
         ),
-        unique=True,
-    ),
-    scopes=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
+        scopes=draw(
+            st.lists(
+                st.text(
+                    st.characters(
+                        whitelist_categories=("L", "N"),
+                        blacklist_categories=("C"),
+                    ),
+                    min_size=3,
+                    max_size=10,
+                ),
+                unique=True,
+            )
         ),
-        unique=True,
-    ),
-    footers=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
-        ),
-        unique=True,
-    ),
-    required_footers=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
-        ),
-        unique=True,
-    ),
-)
-def test_str_config_hypothesis(
-    header,
-    body,
-    repair,
-    wrap,
-    force_wrap,
-    spell_check,
-    ignore_generated_commits,
-    generated_commits,
-    types,
-    scopes,
-    footers,
-    required_footers,
-):
+        footers=footers,
+        required_footers=footers,
+    )
+
+
+@given(conf=configuration())
+def test_stringify_config(conf):
     """Should stringify a config."""
     ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load([])
-    ccr.options.header_length = header
-    ccr.options.body_length = body
-    ccr.options.repair = repair
-    ccr.options.wrap = wrap
-    ccr.options.force_wrap = force_wrap
-    ccr.options.spell_check = spell_check
-    ccr.options.ignore_generated_commits = ignore_generated_commits
-    ccr.options.generated_commits = generated_commits
-    ccr.options.types = types
-    ccr.options.scopes = scopes
-    ccr.options.footers = footers
-    ccr.options.required_footers = required_footers
+    ccr.options = conf
 
     # Assert the TOML is correct.
-    assert f"header_length = {header}" in str(ccr.options)
-    assert f"body_length = {body}" in str(ccr.options)
-    assert f"repair = {str(repair).lower()}" in str(ccr.options)
-    assert f"wrap = {str(wrap).lower()}" in str(ccr.options)
-    assert f"force_wrap = {str(force_wrap).lower()}" in str(ccr.options)
-    assert f"spell_check = {str(spell_check).lower()}" in str(ccr.options)
-    assert f"ignore_generated_commits = {str(ignore_generated_commits).lower()}" in str(
-        ccr.options
+    assert f"header_length = {conf.header_length}" in str(ccr.options)
+    assert f"body_length = {conf.body_length}" in str(ccr.options)
+    assert f"repair = {str(conf.repair).lower()}" in str(ccr.options)
+    assert f"wrap = {str(conf.wrap).lower()}" in str(ccr.options)
+    assert f"force_wrap = {str(conf.force_wrap).lower()}" in str(ccr.options)
+    assert f"spell_check = {str(conf.spell_check).lower()}" in str(ccr.options)
+    assert (
+        f"ignore_generated_commits = {str(conf.ignore_generated_commits).lower()}"
+        in str(ccr.options)
     )
-    assert f"types = {tomlify_list(types)}" in str(ccr.options)
+    assert f"types = {tomlify_list(conf.types)}" in str(ccr.options)
 
     # Assert the JSON is correct.
     ccr.options.set_format("JSON")
-    assert f'"header_length": {header}' in str(ccr.options)
-    assert f'"body_length": {body}' in str(ccr.options)
-    assert f'"repair": {str(repair).lower()}' in str(ccr.options)
-    assert f'"wrap": {str(wrap).lower()}' in str(ccr.options)
-    assert f'"force_wrap": {str(force_wrap).lower()}' in str(ccr.options)
-    assert f'"spell_check": {str(spell_check).lower()}' in str(ccr.options)
+    assert f'"header_length": {conf.header_length}' in str(ccr.options)
+    assert f'"body_length": {conf.body_length}' in str(ccr.options)
+    assert f'"repair": {str(conf.repair).lower()}' in str(ccr.options)
+    assert f'"wrap": {str(conf.wrap).lower()}' in str(ccr.options)
+    assert f'"force_wrap": {str(conf.force_wrap).lower()}' in str(ccr.options)
+    assert f'"spell_check": {str(conf.spell_check).lower()}' in str(ccr.options)
     assert (
-        f'"ignore_generated_commits": {str(ignore_generated_commits).lower()}'
+        f'"ignore_generated_commits": {str(conf.ignore_generated_commits).lower()}'
         in str(ccr.options)
     )
 
 
-@given(
-    header=st.integers(min_value=50, max_value=50),
-    body=st.integers(min_value=70, max_value=120),
-    repair=st.booleans(),
-    wrap=st.booleans(),
-    force_wrap=st.booleans(),
-    spell_check=st.booleans(),
-    ignore_generated_commits=st.booleans(),
-    generated_commits=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N", "P"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
-        ),
-        unique=True,
-    ),
-    types=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
-        ),
-        unique=True,
-    ),
-    scopes=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
-        ),
-        unique=True,
-    ),
-    footers=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
-        ),
-        unique=True,
-    ),
-    required_footers=st.lists(
-        st.text(
-            st.characters(
-                whitelist_categories=("L", "N"),
-                blacklist_categories=("C"),
-            ),
-            min_size=3,
-            max_size=10,
-        ),
-        unique=True,
-    ),
-)
-def test_repr_config_hypothesis(
-    header,
-    body,
-    repair,
-    wrap,
-    force_wrap,
-    spell_check,
-    ignore_generated_commits,
-    generated_commits,
-    types,
-    scopes,
-    footers,
-    required_footers,
-):
+@given(conf=configuration())
+def test_reproduce_config(conf):
     """Should reproduce a config."""
     ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load([])
-    ccr.options.header_length = header
-    ccr.options.body_length = body
-    ccr.options.repair = repair
-    ccr.options.wrap = wrap
-    ccr.options.force_wrap = force_wrap
-    ccr.options.spell_check = spell_check
-    ccr.options.ignore_generated_commits = ignore_generated_commits
-    ccr.options.generated_commits = generated_commits
-    ccr.options.types = types
-    ccr.options.scopes = scopes
-    ccr.options.footers = footers
-    ccr.options.required_footers = required_footers
+    ccr.options = conf
 
     # Assert on the repr().
-    assert f"header_length={header}" in repr(ccr.options)
-    assert f"body_length={body}" in repr(ccr.options)
-    assert f"repair={repair}" in repr(ccr.options)
-    assert f"wrap={wrap}" in repr(ccr.options)
-    assert f"force_wrap={force_wrap}" in repr(ccr.options)
-    assert f"spell_check={spell_check}" in repr(ccr.options)
-    assert f"ignore_generated_commits={ignore_generated_commits}" in repr(ccr.options)
-    assert f"types={types}" in repr(ccr.options)
+    assert f"header_length={conf.header_length}" in repr(ccr.options)
+    assert f"body_length={conf.body_length}" in repr(ccr.options)
+    assert f"repair={conf.repair}" in repr(ccr.options)
+    assert f"wrap={conf.wrap}" in repr(ccr.options)
+    assert f"force_wrap={conf.force_wrap}" in repr(ccr.options)
+    assert f"spell_check={conf.spell_check}" in repr(ccr.options)
+    assert f"ignore_generated_commits={conf.ignore_generated_commits}" in repr(
+        ccr.options
+    )
+    assert f"types={conf.types}" in repr(ccr.options)
+    assert f"scopes={conf.scopes}" in repr(ccr.options)
 
 
 @pytest.mark.parametrize(

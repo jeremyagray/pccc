@@ -13,11 +13,15 @@
 import io
 import json
 import os
+import random
 import re
 import sys
 
 import pyparsing as pp
 import pytest
+from hypothesis import example
+from hypothesis import given
+from hypothesis import strategies as st
 
 sys.path.insert(0, "/home/gray/src/work/pccc")
 
@@ -53,6 +57,127 @@ def config():
         conf_data = f.read()
 
     return conf_data
+
+
+@st.composite
+def commit(draw):
+    """Generate a commit object strategy."""
+    footers = draw(
+        st.lists(
+            st.text(
+                st.characters(
+                    whitelist_categories=("L", "N"),
+                    blacklist_categories=("C"),
+                ),
+                min_size=3,
+                max_size=10,
+            ),
+            unique=True,
+        )
+    )
+
+    conf = pccc.Config(
+        header_length=draw(st.integers(min_value=50, max_value=50)),
+        body_length=draw(st.integers(min_value=70, max_value=120)),
+        repair=draw(st.booleans()),
+        wrap=draw(st.booleans()),
+        force_wrap=draw(st.booleans()),
+        spell_check=draw(st.booleans()),
+        ignore_generated_commits=draw(st.booleans()),
+        generated_commits=draw(
+            st.lists(
+                st.text(
+                    st.characters(
+                        whitelist_categories=("L", "N", "P"),
+                        blacklist_categories=("C"),
+                    ),
+                    min_size=3,
+                    max_size=10,
+                ),
+                unique=True,
+            )
+        ),
+        types=draw(
+            st.lists(
+                st.text(
+                    st.characters(
+                        whitelist_categories=("L", "N"),
+                        blacklist_categories=("C"),
+                    ),
+                    min_size=3,
+                    max_size=10,
+                ),
+                unique=True,
+                min_size=2,
+                max_size=8,
+            )
+        ),
+        scopes=draw(
+            st.lists(
+                st.text(
+                    st.characters(
+                        whitelist_categories=("L", "N"),
+                        blacklist_categories=("C"),
+                    ),
+                    min_size=3,
+                    max_size=10,
+                ),
+                unique=True,
+                min_size=3,
+                max_size=8,
+            )
+        ),
+        footers=footers,
+        required_footers=footers,
+    )
+
+    commit = pccc.ConventionalCommitRunner()
+    commit.options = conf
+    type = random.choice(commit.options.types)
+    scope = random.choice(commit.options.scopes)
+    description = draw(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=20,
+            max_size=50 - (len(type) + len(scope) + 4),
+        )
+    )
+    message = draw(
+        st.text(
+            st.characters(
+                whitelist_categories=("L", "N"),
+                blacklist_categories=("C"),
+            ),
+            min_size=50,
+            max_size=500,
+        )
+    )
+
+    commit.raw = f"""{type}({scope}): {description}
+
+    {message}
+    """
+
+    return commit
+
+
+@given(commit=commit())
+def test_generated_commit(commit):
+    """Should do something."""
+    commit.clean()
+    commit.parse()
+
+    header = commit.raw.split("\n")[0]
+    (type, scope) = header.split(":")[0].split("(")
+    scope = scope.split(")")[0]
+    print(f"type: {type} {commit.header['type']}")
+    print(f"scope: {scope} {commit.header['scope']}")
+
+    assert type == commit.header["type"]
+    assert scope == commit.header["scope"]
 
 
 @pytest.mark.parametrize(
