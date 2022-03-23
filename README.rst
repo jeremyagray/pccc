@@ -11,8 +11,8 @@ The Python Conventional Commit Checker.
    :target: https://pccc.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
-What is pccc?
-=============
+Description
+===========
 
 pccc is a PyParsing based grammar and script for parsing and verifying
 a commit message is a conventional commit.  The default grammar
@@ -53,25 +53,6 @@ See:
 
 Roadmap
 =======
-
-#. Implement complete interoperability with TOML, JSON, YAML, and BespON for
-   configuration. (target: 0.5.0)
-
-   * ``Config().__str__()`` should output any format
-     * TOML (finished: 0.4.3)
-     * JSON (finished: 0.4.3)
-     * YAML
-     * BespON
-   * streamline testing fixture data formats
-
-#. Implement spell checking. (target: 0.5.0)
-
-   * create spelling validation function for validation mode
-   * if enabled, mirror raw commit and questionable words to standard
-     output and return a non-zero exit code
-   * questionable words will be ignored by adding the words to the
-     commented ``ignore-spelling: `` field
-     (``r"^\s*#\s*ignore-spelling:\s+``).
 
 #. Implement simple output reformatting, with configuration options
    and validation functions, operating in the validation/reformatting
