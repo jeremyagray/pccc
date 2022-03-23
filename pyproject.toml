@@ -80,7 +80,9 @@ types = [
 
 scopes = [
   "config",
+  "docs",
   "parser",
+  "tooling",
 ]
 
 footers = [
