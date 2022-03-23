@@ -479,6 +479,60 @@ def test_config_validate(fn, data, fs):
                 ccr.options.validate()
 
 
+# Create files with different body lengths and test the correct one is
+# loaded.
+def test_config_file_loading_order(fs):
+    """Should load configuration files in correct order."""
+    i = 60
+
+    # TOML.
+    for filename in (
+        "custom.toml",
+        "pyproject.toml",
+        "pccc.toml",
+    ):
+        fs.create_file(filename)
+        i += 1
+        with open(filename, "w") as file:
+            if filename == "pyproject.toml":
+                file.write(f"[tool.pccc]\n\nbody_length = {i}\n")
+            else:
+                file.write(f"[pccc]\n\nbody_length = {i}\n")
+
+    # JSON.
+    for filename in (
+        "package.json",
+        "pccc.json",
+    ):
+        fs.create_file(filename)
+        i += 1
+        with open(filename, "w") as file:
+            file.write(f'{{"pccc": {{\n  "body_length": {i}\n}}\n}}\n')
+
+    # Not implemented.
+    # YAML.
+    # BespON.
+
+    files = [
+        "custom.toml",
+        "pyproject.toml",
+        "pccc.toml",
+        "package.json",
+        "pccc.json",
+        # "pccc.yaml",
+        # "pccc.yml",
+        # "pccc.besp",
+    ]
+
+    i = 60
+    for file in files:
+        ccr = pccc.ConventionalCommitRunner()
+        ccr.options.load(["--config", "custom.toml"])
+        i += 1
+        assert ccr.options.body_length == i
+        fs.remove_object(file)
+
+
 # Fake file system without pyproject.toml/package.json.
 def test_nonexistent_default_files(capsys, fs):
     """Test output with non-existent default configuration files."""
