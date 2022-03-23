@@ -44,7 +44,7 @@ def get_commits():
                         print(f"JSON error in file {entry.name}")
                         raise error
                 datum[0]["filename"] = entry.name
-                data.append(tuple(datum))
+                data.append(tuple([entry.path, datum]))
 
     return data
 
@@ -181,10 +181,10 @@ def test_generated_commit(commit):
 
 
 @pytest.mark.parametrize(
-    "obj",
+    "fn, obj",
     get_commits(),
 )
-def test_commits(obj):
+def test_commits(fn, obj):
     """Test commits."""
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load("")
@@ -264,10 +264,10 @@ def test_commits(obj):
 
 
 @pytest.mark.parametrize(
-    "obj",
+    "fn, obj",
     get_commits(),
 )
-def test_main_file(config, obj, fs, capsys):
+def test_main_file(config, fn, obj, fs, capsys):
     """Test pccc.main() with commits from files."""
     # Commit message.
     fn = "./pyproject.toml"
@@ -313,10 +313,10 @@ def test_main_file(config, obj, fs, capsys):
 
 
 @pytest.mark.parametrize(
-    "obj",
+    "fn, obj",
     get_commits(),
 )
-def test_main_stdin(config, obj, monkeypatch, fs):
+def test_main_stdin(config, fn, obj, monkeypatch, fs):
     """Test pccc.main() with commits from STDIN."""
     # Configuration file.
     fn = "./pyproject.toml"
