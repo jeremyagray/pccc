@@ -124,8 +124,10 @@ packages = [
 
 [tool.poetry.dependencies]
 
+bespon = "^0"
 pyparsing = "^2.4"
 python = "^3.9"
+"ruamel.yaml" = "^0"
 toml = "^0"
 
 [tool.poetry.dev-dependencies]
