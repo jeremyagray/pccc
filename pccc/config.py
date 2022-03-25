@@ -493,6 +493,64 @@ def _load_toml_file(filename="./pyproject.toml"):
     return empty_options
 
 
+def _load_yaml_file(filename="./pccc.yaml"):
+    """Load a YAML configuration file, using the ``pccc`` entry.
+
+    Load a YAML configuration file, returning options from the
+    top-level ``pccc`` dictionary.
+
+    Parameters
+    ----------
+    filename : string (optional), default="pccc.yaml"
+        Configuration file to load.
+
+    Returns
+    -------
+    dict : options
+       Configuration option keys and values, with unset values
+       explicitly set to ``None``.
+
+    Raises
+    ------
+    YamlDecodeError
+        Raised if there are problems decoding a YAML configuration
+        file.
+    FileNotFoundError
+        Raised if the configuration file does not exist or is not
+        readable.
+    """
+    raise NotImplementedError
+
+
+def _load_bespon_file(filename="./pccc.besp"):
+    """Load a BespON configuration file, using the ``pccc`` entry.
+
+    Load a BespON configuration file, returning options from the
+    top-level ``pccc`` dictionary.
+
+    Parameters
+    ----------
+    filename : string (optional), default="pccc.besp"
+        Configuration file to load.
+
+    Returns
+    -------
+    dict : options
+       Configuration option keys and values, with unset values
+       explicitly set to ``None``.
+
+    Raises
+    ------
+    BesponDecodeError
+        Raised if there are problems decoding a BespON configuration
+        file.
+    FileNotFoundError
+        Raised if the configuration file does not exist or is not
+        readable.
+    """
+    raise NotImplementedError
+
+
 def _create_argument_parser():
     """Create an argparse argument parser."""
     parser = argparse.ArgumentParser(
