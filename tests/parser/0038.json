@@ -15,11 +15,11 @@
   "breaking": {
     "flag": false,
     "token": "",
-    "separator": ": ",
+    "separator": "",
     "value": "",
     "longest": 0
   },
   "footers": [],
-  "parseable": false,
+  "parseable": true,
   "errors": []
 }
