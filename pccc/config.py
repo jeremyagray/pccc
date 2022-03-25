@@ -770,7 +770,7 @@ class _ShowLicenseAction(argparse.Action):
         license = """\
 pccc:  The Python Conventional Commit Checker.
 
-Copyright (C) 2021 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+Copyright (C) 2021-2022 Jeremy A Gray <jeremy.a.gray@gmail.com>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
