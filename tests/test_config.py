@@ -533,125 +533,45 @@ def test_config_file_loading_order(fs):
         fs.remove_object(file)
 
 
-# Fake file system without pyproject.toml/package.json.
-def test_nonexistent_default_files(capsys, fs):
-    """Test output with non-existent default configuration files."""
+def test_no_config_files(fs):
+    """Should use defaults if no configuration files."""
     ccr = pccc.ConventionalCommitRunner()
     ccr.options.load("")
 
-    # Both missing.
-    actual = capsys.readouterr().out
-    expected = "Unable to find configuration file .*, using defaults and CLI options."
-
-    assert re.search(expected, actual)
-
-    # TOML but no JSON.
-    fn = "./pyproject.toml"
-    fs.create_file(fn)
-    with open(fn, "w") as file:
-        file.write("[tool.pccc]")
-
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load("")
     assert ccr.options.header_length == 50
     assert ccr.options.body_length == 72
 
-    # JSON but no TOML.
-    fs.remove_object(fn)
-    fn = "./package.json"
-    fs.create_file(fn)
-    with open(fn, "w") as file:
-        file.write('{"pccc": {}}')
 
-    ccr = pccc.ConventionalCommitRunner()
-    ccr.options.load("")
-
-    actual = capsys.readouterr().out
-
-    expected = r"No such file or directory in the fake filesystem: \./pyproject\.toml"
-    assert re.search(expected, actual)
-
-    expected = r"trying package\.json\.\.\."
-    assert re.search(expected, actual)
-
-
-# Fake file system with malformed configuration files.
-def test_malformed_configuration_file(capsys, fs):
-    """Test output with malformed configuration files."""
+def test_malformed_config_file(capsys, fs):
+    """Should use defaults with malformed configuration files."""
     ccr = pccc.ConventionalCommitRunner()
 
-    # Write TOML file with JSON.
-    fn = "./pyproject.toml"
-    fs.create_file(fn)
-    with open(fn, "w") as file:
-        file.write('{"pccc": {}}')
-
-    ccr.options.load("")
-
-    capture = capsys.readouterr()
-
-    error = "Ensure that file format matches extension"
-
-    assert re.search(error, capture.out)
-
-    # Write JSON file with TOML.
-    fn = "./package.json"
-    fs.create_file(fn)
-    with open(fn, "w") as file:
-        file.write("[tool.pccc]")
-
-    ccr.options.load("")
-
-    capture = capsys.readouterr()
-
-    error = "Ensure that file format matches extension"
-
-    assert re.search(error, capture.out)
-
-    # Garbage.
+    # Hot garbage.
     fn = "hot-garbage"
     fs.create_file(fn)
     with open(fn, "w") as f:
         f.write("This file is hot garbage.\n")
 
-    with pytest.raises(pccc.NotParseableError):
-        ccr.options.load(["--config", fn])
+    ccr.options.load(["--config", fn])
+    assert ccr.options.header_length == 50
+    assert ccr.options.body_length == 72
 
 
-def test_nonexistent_configuration_file(capsys):
-    """Test output with non-existent configuration files."""
+def test_nonexistent_config_files():
+    """Should use defaults with non-existent configuration files."""
     files = [
         "no.toml",
         "no.json",
-        "no.way",
+        "no.yaml",
+        "no.besp",
     ]
 
     for file in files:
         ccr = pccc.ConventionalCommitRunner()
         ccr.options.load(["--config", file])
-        actual = capsys.readouterr().out
-        expected = (
-            f"Unable to find configuration file {file},"
-            " using defaults and CLI options."
-        )
 
-        assert re.search(expected, actual)
-
-
-def test_bad_configuration_files(capsys):
-    """Test output with bad configuration files."""
-    files = [
-        "./tests/config/bad.toml",
-        "./tests/config/bad.json",
-    ]
-
-    for file in files:
-        ccr = pccc.ConventionalCommitRunner()
-        ccr.options.load(["--config", file])
-        actual = capsys.readouterr().out
-        expected = "Ensure that file format matches extension"
-
-        assert re.search(expected, actual)
+        assert ccr.options.header_length == 50
+        assert ccr.options.body_length == 72
 
 
 def test_show_license_info(capsys):
