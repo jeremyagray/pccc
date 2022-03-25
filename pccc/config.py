@@ -26,7 +26,7 @@ class Config:
     """Class for accessing and loading pccc configuration options.
 
     Provides default values for all pccc configuration options and
-    loading methods for reading pyproject.toml and CLI options.
+    loading methods for reading ``pyproject.toml`` and CLI options.
 
     Attributes
     ----------
@@ -66,7 +66,7 @@ class Config:
     def __init__(
         self,
         commit="",
-        config_file="./pyproject.toml",
+        config_file="pyproject.toml",
         header_length=50,
         body_length=72,
         repair=False,
@@ -589,8 +589,8 @@ to redistribute it under certain conditions; type ``pccc
         "--config-file",
         dest="config_file",
         type=str,
-        default="./pyproject.toml",
-        help="Path to configuration file.  Default is ./pyproject.toml.",
+        default="pyproject.toml",
+        help="Path to configuration file.  Default is ``pyproject.toml``.",
     )
 
     parser.add_argument(
