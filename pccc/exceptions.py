@@ -26,13 +26,13 @@ class NotParseableError(Exception):
 class ClosesIssueParseException(ParseFatalException):
     """Github closes issue string not parseable."""
 
-    def __init__(self, line, loc, message, string):
+    def __init__(self, string, loc, msg=None, elem=None):
         """Initialize a ``ClosesIssueParseException``."""
-        super().__init__(line, loc, message)
-        self.line = line
-        self.loc = loc
-        self.message = message
+        super().__init__(string, loc, msg=msg, elem=elem)
         self.string = string
+        self.loc = loc
+        self.msg = msg
+        self.elem = elem
 
     def __str__(self):
         """Stringify a ``ClosesIssueParseException``."""
@@ -53,10 +53,10 @@ class ClosesIssueParseException(ParseFatalException):
         """Reproduce a ``ClosesIssueParseException``."""
         return (
             "ClosesIssueParseException("
-            f"line={repr(self.line)},"
+            f"string={repr(self.string)},"
             f" loc={repr(self.loc)},"
-            f" message={repr(self.message)},"
-            f" string={repr(self.string)},"
+            f" msg={repr(self.msg)},"
+            f" elem={repr(self.elem)},"
             ")"
         )
 

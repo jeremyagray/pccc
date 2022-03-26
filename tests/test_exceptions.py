@@ -25,16 +25,16 @@ def test_stringify_closes_issue_parse_exception():
     begin = "begin"
     bad = "x"
     end = "end"
-    line = "beginxend"
+    string = begin + bad + end
     location = len(begin)
     message = "error"
-    string = begin + bad + end
+    element = None
 
     error = pccc.ClosesIssueParseException(
-        line,
+        string,
         location,
         message,
-        string,
+        element,
     )
 
     assert str(error) == (
@@ -51,24 +51,24 @@ def test_reproduce_closes_issue_parse_exception():
     begin = "begin"
     bad = "x"
     end = "end"
-    line = "beginxend"
+    string = begin + bad + end
     location = len(begin)
     message = "error"
-    string = begin + bad + end
+    element = None
 
     error = pccc.ClosesIssueParseException(
-        line,
+        string,
         location,
         message,
-        string,
+        element,
     )
 
     assert repr(error) == (
         "ClosesIssueParseException("
-        f"line={repr(line)},"
+        f"string={repr(string)},"
         f" loc={repr(location)},"
-        f" message={repr(message)},"
-        f" string={repr(string)},"
+        f" msg={repr(message)},"
+        f" elem={repr(element)},"
         ")"
     )
 
