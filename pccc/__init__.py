@@ -29,6 +29,11 @@ Examples
 >>> ccr.parse()
 """
 from .config import Config
+from .config import _determine_file_format
+from .config import _load_bespon_file
+from .config import _load_json_file
+from .config import _load_toml_file
+from .config import _load_yaml_file
 from .exceptions import BodyLengthError
 from .exceptions import BreakingLengthError
 from .exceptions import ClosesIssueParseException

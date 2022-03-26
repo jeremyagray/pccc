@@ -6,11 +6,15 @@ import re
 import shutil
 import sys
 
+import bespon
 import pytest
 import toml
+from hypothesis import HealthCheck
 from hypothesis import example
 from hypothesis import given
+from hypothesis import settings
 from hypothesis import strategies as st
+from ruamel.yaml import YAML
 
 sys.path.insert(0, "/home/gray/src/work/pccc")
 
@@ -324,116 +328,6 @@ def test_str_repr_property(fn, data, fs):
     assert str(ccr_one.options) == str(ccr_two.options)
 
 
-# @pytest.mark.parametrize(
-#     "fn, data",
-#     load_configuration_data(),
-# )
-# def test_repr(fn, data, fs):
-#     """Test Config().__repr__()."""
-#     actuals = []
-
-#     # TOML configuration file.
-#     fn_toml = re.sub(r"json$", "toml", fn)
-#     fs.create_file(fn_toml)
-#     with open(fn_toml, "w") as file:
-#         # file.write(data["pyproject"])
-#         file.write(data["toml"])
-
-#     ccr = pccc.ConventionalCommitRunner()
-#     ccr.options.load(["--config", fn_toml] + data["cli"])
-
-#     # actual = repr(ccr.options)
-#     actuals.append(
-#         {
-#             "string": repr(ccr.options),
-#             "fn": fn_toml,
-#         }
-#     )
-
-#     # JSON configuration file.
-#     fs.create_file(fn)
-#     with open(fn, "w") as file:
-#         json.dump(data, file, indent=2)
-
-#     ccr = pccc.ConventionalCommitRunner()
-#     ccr.options.load(["--config", fn] + data["cli"])
-
-#     actuals.append(
-#         {
-#             "string": repr(ccr.options),
-#             "fn": fn,
-#         }
-#     )
-
-#     for actual in actuals:
-#         # Assertion on expectations for Config().__repr__().
-#         # repr begins with class name and open parenthesis.
-#         assert re.match(r"Config\(", actual["string"])
-#         # repr contains correct commit message.
-#         assert re.search(fr"\s*commit=\"{ccr.options.commit}\",\s+", actual["string"])
-#         # repr contains correct configuration file.
-#         assert re.search(fr"\s+config_file=\"{actual['fn']}\",\s+", actual["string"])
-#         # repr contains correct header length.
-#         assert re.search(
-#             fr"\s+header_length={ccr.options.header_length},\s+", actual["string"]
-#         )
-#         # repr contains correct body length.
-#         assert re.search(
-#             fr"\s+body_length={ccr.options.body_length},\s+", actual["string"]
-#         )
-#         # repr contains correct repair setting.
-#         assert re.search(fr"\s+repair={ccr.options.repair},\s+", actual["string"])
-#         # repr contains correct wrap setting.
-#         assert re.search(fr"\s+wrap={ccr.options.wrap},\s+", actual["string"])
-#         # repr contains correct force_wrap setting.
-#         assert re.search(
-#             fr"\s+force_wrap={ccr.options.force_wrap},\s+", actual["string"]
-#         )
-#         # repr contains correct spell check setting.
-#         assert re.search(
-#             fr"\s+spell_check={ccr.options.spell_check},\s+", actual["string"]
-#         )
-#         # repr contains correct ignore generated commits setting.
-#         assert re.search(
-#             fr"\s+ignore_generated_commits={ccr.options.ignore_generated_commits},\s+",
-#             actual["string"],
-#         )
-
-#         # repr contains correct generated commits list.
-#         assert re.search(
-#             r",\s+generated_commits="
-#             fr"{re.escape(repr(ccr.options.generated_commits))},\s+",
-#             actual["string"],
-#         )
-#         # repr contains correct types list.
-#         assert re.search(
-#             fr",\s+types={re.escape(repr(ccr.options.types))},\s+", actual["string"]
-#         )
-#         # repr contains correct scopes list.
-#         assert re.search(
-#             fr",\s+scopes={re.escape(repr(ccr.options.scopes))},\s+", actual["string"]
-#         )
-#         # repr contains correct footers list.
-#         assert re.search(
-#             fr",\s+footers={re.escape(repr(ccr.options.footers))},\s+",
-#             actual["string"],
-#         )
-#         # repr contains correct required footers list.
-#         assert re.search(
-#             r",\s+required_footers="
-#             fr"{re.escape(repr(ccr.options.required_footers))},\s+",
-#             actual["string"],
-#         )
-#         # repr contains correct format.
-#         assert re.search(
-#             fr",\s+format=\"{ccr.options.format}\"\)",
-#             actual["string"],
-#         )
-
-#         # repr ends with close parenthesis.
-#         assert re.search(r"\)$", actual["string"])
-
-
 @pytest.mark.parametrize(
     "fn, data",
     load_configuration_data(),
@@ -498,7 +392,7 @@ def test_config_file_loading_order(fs):
         fs.create_file(filename)
         i += 1
         with open(filename, "w") as file:
-            if filename == "pyproject.toml":
+            if "pyproject.toml" in filename:
                 file.write(f"[tool.pccc]\n\nbody_length = {i}\n")
             else:
                 file.write(f"[pccc]\n\nbody_length = {i}\n")
@@ -576,6 +470,188 @@ def test_nonexistent_config_files():
 
         assert ccr.options.header_length == 50
         assert ccr.options.body_length == 72
+
+
+def test__determine_file_format_toml(fs):
+    """Should identify a TOML file."""
+    filename = "config.toml"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        # tdata = {"pccc": str(ccr.options)}
+        tdata = {
+            "pccc": {
+                "header_length": 50,
+                "body_length": 72,
+            },
+        }
+        toml.dump(tdata, file)
+
+    assert pccc._determine_file_format(filename) == "toml"
+
+
+def test__determine_file_format_json(fs):
+    """Should identify a JSON file."""
+    filename = "config.toml"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        data = {
+            "pccc": {
+                "header_length": 50,
+                "body_length": 72,
+            },
+        }
+        json.dump(data, file)
+
+    assert pccc._determine_file_format(filename) == "json"
+
+
+def test__determine_file_format_yaml(fs):
+    """Should identify a YAML file."""
+    filename = "config.yaml"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        data = {
+            "pccc": {
+                "header_length": 50,
+                "body_length": 72,
+            },
+        }
+
+        yaml = YAML(typ="safe")
+        yaml.dump(data, file)
+
+    with pytest.raises(ValueError):
+        pccc._determine_file_format(filename)
+
+
+def test__determine_file_format_bespon(fs):
+    """Should identify a BespON file."""
+    filename = "config.besp"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        data = {
+            "pccc": {
+                "header_length": 50,
+                "body_length": 72,
+            },
+        }
+
+        bespon.dump(data, file)
+
+    with pytest.raises(ValueError):
+        pccc._determine_file_format(filename)
+
+
+def test__determine_file_format_no_file(fs):
+    """Should raise ``FileNotFoundError``."""
+    filename = "not.here"
+
+    with pytest.raises(FileNotFoundError):
+        pccc._determine_file_format(filename)
+
+
+def test__load_toml_file(fs):
+    """Should load a TOML file."""
+    filename = "config.toml"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        data = {
+            "pccc": {
+                "header_length": 48,
+                "body_length": 68,
+            },
+        }
+        toml.dump(data, file)
+
+    options = pccc._load_toml_file(filename)
+
+    assert options["header_length"] == 48
+    assert options["body_length"] == 68
+
+
+def test__load_toml_file_bad_format(fs):
+    """Should raise ``TomlDecodeError``."""
+    filename = "config.toml"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        data = {
+            "pccc": {
+                "header_length": 48,
+                "body_length": 68,
+            },
+        }
+        json.dump(data, file)
+
+    with pytest.raises(toml.TomlDecodeError):
+        pccc._load_toml_file(filename)
+
+
+def test__load_toml_file_no_file(fs):
+    """Should raise ``FileNotFoundError``."""
+    filename = "not.here"
+
+    with pytest.raises(FileNotFoundError):
+        pccc._load_toml_file(filename)
+
+
+def test__load_json_file(fs):
+    """Should load a JSON file."""
+    filename = "config.json"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        data = {
+            "pccc": {
+                "header_length": 48,
+                "body_length": 68,
+            },
+        }
+        json.dump(data, file)
+
+    options = pccc._load_json_file(filename)
+
+    assert options["header_length"] == 48
+    assert options["body_length"] == 68
+
+
+def test__load_json_file_bad_format(fs):
+    """Should raise ``JSONDecodeError``."""
+    filename = "config.json"
+    fs.create_file(filename)
+    with open(filename, "w") as file:
+        data = {
+            "pccc": {
+                "header_length": 48,
+                "body_length": 68,
+            },
+        }
+        toml.dump(data, file)
+
+    with pytest.raises(json.JSONDecodeError):
+        pccc._load_json_file(filename)
+
+
+def test__load_json_file_no_file(fs):
+    """Should raise ``FileNotFoundError``."""
+    filename = "not.here"
+
+    with pytest.raises(FileNotFoundError):
+        pccc._load_json_file(filename)
+
+
+def test__load_yaml_file():
+    """Should raise ``NotImplementedError``."""
+    filename = "not.here"
+
+    with pytest.raises(NotImplementedError):
+        pccc._load_yaml_file(filename)
+
+
+def test__load_bespon_file():
+    """Should raise ``NotImplementedError``."""
+    filename = "not.here"
+
+    with pytest.raises(NotImplementedError):
+        pccc._load_bespon_file(filename)
 
 
 def test_show_license_info(capsys):
