@@ -199,7 +199,7 @@ def test_commits(fn, obj):
         assert ccr.footers == obj[0]["footers"]
 
         assert str(ccr) == obj[0]["parsed"]
-        assert repr(ccr) == fr"ConventionalCommit(raw={ccr.raw})"
+        assert repr(ccr) == rf"ConventionalCommit(raw={ccr.raw})"
 
         # Check closes issues.
         if "closes_issues" in obj[0]:

@@ -142,18 +142,18 @@ class ConventionalCommit:
         """Stringify a parsed commit header."""
         if self.header["scope"] != "" and not self.breaking["flag"]:
             header = (
-                fr"{self.header['type']}({self.header['scope']}):"
-                fr" {self.header['description']}"
+                rf"{self.header['type']}({self.header['scope']}):"
+                rf" {self.header['description']}"
             )
         elif self.header["scope"] != "" and self.breaking["flag"]:
             header = (
-                fr"{self.header['type']}({self.header['scope']})!:"
-                fr" {self.header['description']}"
+                rf"{self.header['type']}({self.header['scope']})!:"
+                rf" {self.header['description']}"
             )
         elif self.header["scope"] == "" and not self.breaking["flag"]:
-            header = fr"{self.header['type']}: {self.header['description']}"
+            header = rf"{self.header['type']}: {self.header['description']}"
         elif self.header["scope"] == "" and self.breaking["flag"]:
-            header = fr"{self.header['type']}!: {self.header['description']}"
+            header = rf"{self.header['type']}!: {self.header['description']}"
 
         return header
 
@@ -191,7 +191,7 @@ class ConventionalCommit:
         string
             A string representation of a ``ConventionalCommit()``.
         """
-        return fr"ConventionalCommit(raw={self.raw})"
+        return rf"ConventionalCommit(raw={self.raw})"
 
 
 class ConventionalCommitRunner(ConventionalCommit):
@@ -438,9 +438,14 @@ class ConventionalCommitRunner(ConventionalCommit):
                 + self.breaking["value"]
             )
             commit = textwrap.fill(commit, self.options.body_length)
-            commit = commit.removeprefix(
-                self.breaking["token"] + self.breaking["separator"],
-            )
+            if sys.version_info >= (3, 6) and sys.version_info < (3, 9):
+                commit = commit[
+                    len(self.breaking["token"] + self.breaking["separator"]) :
+                ]
+            else:
+                commit = commit.removeprefix(
+                    self.breaking["token"] + self.breaking["separator"],
+                )
             self.breaking["value"] = commit
             self.set_breaking_longest()
 
