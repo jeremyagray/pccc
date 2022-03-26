@@ -35,7 +35,7 @@ copyright = "2021-2022, Jeremy A Gray"
 author = "Jeremy A Gray"
 
 # The full version, including alpha/beta/rc tags
-release = "0.4.8"
+release = "0.4.9"
 
 
 # -- General configuration ---------------------------------------------------
