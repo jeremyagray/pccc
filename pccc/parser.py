@@ -12,13 +12,12 @@
 
 import copy
 import fileinput
-
-# import pyenchant  # spell check
 import re
 import sys
 import textwrap
 
 import pyparsing as pp
+from enchant.checker import SpellChecker
 
 from .config import Config
 from .exceptions import BodyLengthError
@@ -222,7 +221,19 @@ class ConventionalCommitRunner(ConventionalCommit):
         # Add a Config() object.
         self.options = Config()
 
+        self.errors = None
+        self.spell_ignore_words = []
+
         super().__init__()
+
+    def _add_spell_ignore_word(self, line):
+        """Add word to spelling ignore list."""
+        ignore = re.compile(r"^\s*#\s*IGNORE:\s*(\w+).*$")
+        match = ignore.match(line)
+
+        self.spell_ignore_words.append(match.group(1))
+
+        return
 
     def clean(self):
         r"""Clean a commit before parsing.
@@ -231,9 +242,15 @@ class ConventionalCommitRunner(ConventionalCommit):
         ``"^\\s*#.*$"``) from a commit message before parsing.
         """
         comment = re.compile(r"^\s*#.*$")
+        ignore = re.compile(r"^\s*#\s*IGNORE:.*$")
         cleaned = ""
 
         for line in self.raw.rstrip().split("\n"):
+            # Grab words to ignore on spell check.
+            if ignore.match(line):
+                self._add_spell_ignore_word(line)
+                continue
+
             # Remove comments.
             if not comment.match(line):
                 cleaned += line + "\n"
@@ -390,6 +407,9 @@ class ConventionalCommitRunner(ConventionalCommit):
             self.wrap()
             self.wrap(part="breaking")
 
+        if self.options.spell_check:
+            self.spell_check()
+
     def set_body_longest(self):
         """Calculate the length of the longest body line."""
         length = 0
@@ -413,6 +433,52 @@ class ConventionalCommitRunner(ConventionalCommit):
         self.breaking["longest"] = length
 
         return self
+
+    def spell_check(self, parts=["header", "body", "breaking"]):
+        """Spell check the ``parts`` of the commit.
+
+        Spell check the specified parts of the commit.  Upon finding
+        an error, add spell check information to ``self.errors``.  The
+        information includes a line beginning with "# ERROR: "
+        indicating the problem word, a line beginning with "# TRY: "
+        listing suggestions from enchant, and a line beginning with "#
+        IGNORE: ", which if present in the commit will cause the spell
+        check to ignore that word.
+
+        Rerunning ``pccc`` on the output will ignore all lines except
+        the above "IGNORE" lines.  None of these lines will be present
+        in the final commit message.  Manually adding "IGNORE" lines
+        prior to running ``spell_check()`` will prevent checking the
+        word.
+
+        Parameters
+        ==========
+        parts : iterable, default = ["header", "body", "breaking"]
+            The parts of the commit to be spell checked.
+        """
+        checker = SpellChecker("en_US")
+
+        for part in parts:
+            text = ""
+            if part == "header":
+                header = getattr(self, part)
+                text = header["description"]
+            elif part == "body":
+                body = getattr(self, part)
+                text = "\n".join(body["paragraphs"])
+            elif part == "breaking":
+                breaking = getattr(self, part)
+                text = breaking["value"]
+
+            if text:
+                checker.set_text(text)
+
+                self.errors = ""
+                for error in checker:
+                    if error.word not in self.spell_ignore_words:
+                        self.errors += f"# ERROR:  {error.word}\n"
+                        self.errors += f"# TRY:  {checker.suggest(error.word)}\n"
+                        self.errors += f"# IGNORE:  {error.word}\n"
 
     def wrap(self, part="body"):
         """Wrap a commit body to a given length."""
@@ -733,7 +799,13 @@ def main(argv=None):
         runner.parse()
         runner.validate()
         runner.post_process()
-        sys.exit(0)
+
+        if runner.errors:
+            print(runner.raw, end="", file=sys.stdout)
+            print(runner.errors, end="", file=sys.stdout)
+            sys.exit(1)
+        else:
+            sys.exit(0)
     except (ValueError, ClosesIssueParseException) as error:
         print(error, file=sys.stderr)
         print(runner.raw, file=sys.stdout)
