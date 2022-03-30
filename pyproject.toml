@@ -125,6 +125,7 @@ packages = [
 [tool.poetry.dependencies]
 
 bespon = "^0"
+pyenchant = "^3"
 pyparsing = "^3"
 python = ">=3.6.1,<4.0"
 "ruamel.yaml" = "^0"
