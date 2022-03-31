@@ -458,6 +458,7 @@ class ConventionalCommitRunner(ConventionalCommit):
         """
         checker = SpellChecker("en_US")
 
+        self.errors = ""
         for part in parts:
             text = ""
             if part == "header":
@@ -473,7 +474,6 @@ class ConventionalCommitRunner(ConventionalCommit):
             if text:
                 checker.set_text(text)
 
-                self.errors = ""
                 for error in checker:
                     if error.word not in self.spell_ignore_words:
                         self.errors += f"# ERROR:  {error.word}\n"
@@ -670,6 +670,7 @@ class ConventionalCommitRunner(ConventionalCommit):
             """
             nll = False
             par = []
+
             for line in tokens:
                 if nll and line == "\n":
                     self.body["paragraphs"].append("".join(par))
@@ -684,6 +685,10 @@ class ConventionalCommitRunner(ConventionalCommit):
 
                 if self.body["longest"] < len(line):
                     self.body["longest"] = len(line)
+
+            # Append the last paragraph, if present.
+            if par:
+                self.body["paragraphs"].append("".join(par))
 
         eos = pp.StringEnd()
 
