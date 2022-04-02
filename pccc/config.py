@@ -19,8 +19,6 @@ import textwrap
 
 import toml
 
-from .exceptions import NotParseableError
-
 
 class Config:
     """Class for accessing and loading pccc configuration options.

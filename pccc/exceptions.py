@@ -13,16 +13,6 @@
 from pyparsing import ParseFatalException
 
 
-class NotParseableError(Exception):
-    """pccc file not parseable exception."""
-
-    def __init__(self, fn):
-        """Initialize a NotParseableError() exception."""
-        self.fn = fn
-        self.message = f"File {fn} could not be parsed."
-        super().__init__(self.message)
-
-
 class ClosesIssueParseException(ParseFatalException):
     """Github closes issue string not parseable."""
 

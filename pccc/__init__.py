@@ -38,7 +38,6 @@ from .exceptions import BodyLengthError
 from .exceptions import BreakingLengthError
 from .exceptions import ClosesIssueParseException
 from .exceptions import HeaderLengthError
-from .exceptions import NotParseableError
 from .parser import ConventionalCommit
 from .parser import ConventionalCommitRunner
 from .parser import main
