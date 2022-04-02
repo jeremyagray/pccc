@@ -51,34 +51,6 @@ See:
 #. https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue/
 #. https://github.com/shinn/github-username-regex/
 
-Roadmap
-=======
-
-#. Implement simple output reformatting, with configuration options
-   and validation functions, operating in the validation/reformatting
-   mode described previously.  (target: 0.6.0)
-
-   * footer separator as ": " or " #"
-   * "BREAKING-CHANGE" or "BREAKING CHANGE"
-   * set breaking flag (!) and/or "BREAKING-CHANGE"
-   * correct token capitalization ("BREAKING-CHANGE" not
-     "breaking-change" or "Breaking-Change"; "Signed-off-by" not
-     "Signed-Off-By" or "signed-off-by")
-
-#. Implement partial parsing on failure for correction and improved
-   exception handling. (target: 0.7.0 or later)
-
-   * header partial parsing
-   * body partial parsing
-   * breaking change partial parsing
-   * footer partial parsing
-
-#. Feature freeze, strict semantic versioning, and finish alpha and
-   beta. (from 0.7.0 onward; first stable will be at 1.0.0)
-
-#. Implement custom hooks for handling per-project footers. (target:
-   2.0.0 or later)
-
 Installation
 ============
 
