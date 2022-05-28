@@ -616,13 +616,13 @@ class ConventionalCommitRunner(ConventionalCommit):
                 r"[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,38}"
             ).setResultsName("repo", listAllMatches=True)
 
-            number = pp.Regex(r"#[0-9]+").setResultsName(
+            number = pp.Regex(r"[0-9]+").setResultsName(
                 "number",
                 listAllMatches=True,
             )
 
             issue = (
-                pp.Group(keyword + pp.Optional(owner + "/" + repo) + number)
+                pp.Group(keyword + pp.Optional(owner + "/") + repo + "#" + number)
                 .setResultsName("issue", listAllMatches=True)
                 .setDebug(flag=PYPARSING_DEBUG)
             )

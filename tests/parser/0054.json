@@ -1,6 +1,6 @@
 {
-  "raw": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes jeremyagray/pccc#1\n",
-  "parsed": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes jeremyagray/pccc#1\n",
+  "raw": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes jeremyagray/pccc/#1\n",
+  "parsed": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes jeremyagray/pccc/#1\n",
   "header": {
     "type": "feat",
     "scope": "parser",
@@ -30,10 +30,10 @@
       "keyword": "closes",
       "owner": "jeremyagray",
       "repo": "pccc",
-      "number": "1"
+      "number": "#1"
     }
   ],
   "cleaned": "feat(parser): add closing footer\n\nAdd closing footer to allow github issue closing.\n\nGithub-closes: closes jeremyagray/pccc#1\n",
-  "parseable": true,
+  "parseable": false,
   "errors": []
 }
