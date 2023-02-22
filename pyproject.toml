@@ -110,11 +110,11 @@ classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.6",
   "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Topic :: Software Development :: Version Control :: Git",
 ]
 
@@ -127,24 +127,24 @@ packages = [
 bespon = "^0"
 pyenchant = "^3"
 pyparsing = "^3"
-python = ">=3.6.1,<4.0"
+python = ">=3.8.1,<4.0"
 "ruamel.yaml" = "^0"
 toml = "^0"
-tox = "^3"
+tox = "^4"
 
 [tool.poetry.dev-dependencies]
 
-Sphinx = "^4"
+Sphinx = "^6"
 black = { version = "*", allow-prereleases = true }
 factory-boy = "^3.2"
-flake8 = "^3.8"
-flake8-docstrings = "^1.5"
-isort = "^5.6"
-hypothesis = "^6.9"
-pre-commit = "^2.9"
-pyfakefs = "^4.3"
-pytest = "^6.1"
-pytest-cov = "^2.10"
+flake8 = "^6"
+flake8-docstrings = "^1"
+isort = "^5"
+hypothesis = "^6"
+pre-commit = "^3"
+pyfakefs = "^5"
+pytest = "^7"
+pytest-cov = "^4"
 
 [tool.poetry.scripts]
 
