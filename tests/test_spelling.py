@@ -4,22 +4,15 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2020-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # ******************************************************************************
 
 """pccc parser spell checking tests."""
 
-import io
-import json
-import os
-import random
-import re
 import sys
 
-import pyparsing as pp
 import pytest
-from hypothesis import example
 from hypothesis import given
 from hypothesis import strategies as st
 

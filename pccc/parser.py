@@ -4,13 +4,12 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2020-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # ******************************************************************************
 
 """pccc parser functions and classes."""
 
-import copy
 import fileinput
 import re
 import sys
@@ -633,7 +632,7 @@ class ConventionalCommitRunner(ConventionalCommit):
 
             try:
                 matches = issues.parseString(tokens[0][2][0], parseAll=True)
-            except (pp.ParseException) as error:
+            except pp.ParseException as error:
                 raise ClosesIssueParseException(
                     error.line,
                     error.args[1],
@@ -643,7 +642,7 @@ class ConventionalCommitRunner(ConventionalCommit):
 
             for match in matches[0]:
                 data = {}
-                for (k, v) in match.items():
+                for k, v in match.items():
                     data[k] = v[0]
                 self.closes_issues.append(data)
 
@@ -815,7 +814,7 @@ def main(argv=None):
         print(error, file=sys.stderr)
         print(runner.raw, file=sys.stdout)
         sys.exit(1)
-    except (pp.ParseException) as error:
+    except pp.ParseException as error:
         print(
             f"parse error at {error.lineno}:{error.col}: {error.line}",
             file=sys.stderr,

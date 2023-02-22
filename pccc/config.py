@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Copyright 2020-2022 Jeremy A Gray <gray@flyquackswim.com>.
+# Copyright 2020-2023 Jeremy A Gray <gray@flyquackswim.com>.
 #
 # ******************************************************************************
 
@@ -12,8 +12,6 @@
 
 import argparse
 import json
-import os
-import re
 import sys
 import textwrap
 
@@ -208,7 +206,7 @@ class Config:
         kwargs : dict
            Key/value pairs of configuration options.
         """
-        for (k, v) in kwargs.items():
+        for k, v in kwargs.items():
             if hasattr(self, k) and v is not None:
                 setattr(self, k, v)
 
@@ -466,7 +464,7 @@ def _load_json_file(filename="./package.json"):
         "generated_commits": None,
     }
 
-    for (k, v) in config["pccc"].items():
+    for k, v in config["pccc"].items():
         empty_options[k] = v
 
     return empty_options
@@ -533,10 +531,10 @@ def _load_toml_file(filename="pyproject.toml"):
     }
 
     if "pyproject.toml" in filename:
-        for (k, v) in config["tool"]["pccc"].items():
+        for k, v in config["tool"]["pccc"].items():
             empty_options[k] = v
     else:
-        for (k, v) in config["pccc"].items():
+        for k, v in config["pccc"].items():
             empty_options[k] = v
 
     return empty_options
@@ -819,7 +817,7 @@ class _ShowLicenseAction(argparse.Action):
         license = """\
 pccc:  The Python Conventional Commit Checker.
 
-Copyright (C) 2021-2022 Jeremy A Gray <jeremy.a.gray@gmail.com>.
+Copyright (C) 2021-2023 Jeremy A Gray <jeremy.a.gray@gmail.com>.
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

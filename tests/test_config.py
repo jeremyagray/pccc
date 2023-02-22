@@ -1,18 +1,24 @@
+# ******************************************************************************
+#
+# pccc, the Python Conventional Commit Checker.
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright 2020-2023 Jeremy A Gray <gray@flyquackswim.com>.
+#
+# ******************************************************************************
+
 """Config unit tests."""
 
 import json
 import os
 import re
-import shutil
 import sys
 
 import bespon
 import pytest
 import toml
-from hypothesis import HealthCheck
-from hypothesis import example
 from hypothesis import given
-from hypothesis import settings
 from hypothesis import strategies as st
 from ruamel.yaml import YAML
 
